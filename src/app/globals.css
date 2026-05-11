@@ -1,0 +1,6 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; background: #0a090a; font-family: "Noto Sans SC", system-ui, sans-serif; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a272a; border-radius: 3px; }
+textarea::placeholder, input::placeholder { color: #6B6469; }
