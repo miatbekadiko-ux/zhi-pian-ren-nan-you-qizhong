@@ -10,7 +10,7 @@ export function shouldGenerateImage(userMessage: string): boolean {
   return TRIGGER_KEYWORDS.some(k => userMessage.includes(k));
 }
 
-// Fixed high-quality prompts per character — keeps appearance consistent across generations
+// Descriptive prompts per character for text-to-image generation
 const CHARACTER_PROMPTS: Record<string, string> = {
   lin: '阳光帅气亚洲男生，26岁，穿着户外冲锋衣，在山野或户外场景，自然光，清新真实风格，人像摄影',
   pei: '冷峻帅气亚洲男生，32岁，深色西装白衬衫，站在落地窗写字楼前，冷蓝色调，高级感，人像摄影',
@@ -19,12 +19,12 @@ const CHARACTER_PROMPTS: Record<string, string> = {
 };
 
 export async function generateCharacterImage(characterId: string): Promise<string> {
-  const apiKey = process.env.IMAGE_API_KEY;
+  const apiKey = process.env.IMAGE_ARK_API_KEY;
   if (!apiKey) return 'placeholder';
 
   const prompt = CHARACTER_PROMPTS[characterId] ?? CHARACTER_PROMPTS['lin'];
-  const baseUrl = process.env.IMAGE_BASE_URL ?? 'https://open.bigmodel.cn/api/paas/v4';
-  const model = process.env.IMAGE_MODEL ?? 'cogview-3-flash';
+  const baseUrl = process.env.IMAGE_BASE_URL ?? 'https://ark.cn-beijing.volces.com/api/v3';
+  const model = process.env.IMAGE_MODEL ?? 'doubao-seedream-5-0-260128';
 
   try {
     const res = await fetch(`${baseUrl}/images/generations`, {
@@ -33,12 +33,24 @@ export async function generateCharacterImage(characterId: string): Promise<strin
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ model, prompt, n: 1, size: '768x1024' }),
+      body: JSON.stringify({
+        model,
+        prompt,
+        n: 1,
+        size: '2048x2048',
+        response_format: 'url',
+      }),
     });
-    if (!res.ok) return 'placeholder';
+
+    if (!res.ok) {
+      console.error('Image API error:', res.status, await res.text());
+      return 'placeholder';
+    }
+
     const data = await res.json();
     return (data.data?.[0]?.url as string) ?? 'placeholder';
-  } catch {
+  } catch (e) {
+    console.error('Image generation error:', e);
     return 'placeholder';
   }
 }

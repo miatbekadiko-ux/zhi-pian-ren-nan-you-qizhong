@@ -47,7 +47,7 @@ export async function getAIReply(
   affectionStage = '陌生人',
 ): Promise<string> {
   // Support ARK_API_KEY (Doubao/Volcano) as an alternative to AI_API_KEY
-  const apiKey = process.env.AI_API_KEY || process.env.ARK_API_KEY;
+  const apiKey = process.env.ARK_API_KEY || process.env.AI_API_KEY;
 
   if (!apiKey) {
     const pool = MOCK_REPLIES[characterId] ?? MOCK_REPLIES['lin'];
@@ -111,7 +111,7 @@ async function callOpenAICompat(
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      model: process.env.AI_MODEL ?? 'doubao-1-5-pro-32k-250115',
+      model: process.env.AI_MODEL ?? 'doubao-seed-2-0-pro-260215',
       max_tokens: 128,
       messages,
     }),
