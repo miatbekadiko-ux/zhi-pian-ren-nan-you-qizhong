@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: '纸片人男友',
@@ -18,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body style={{ margin: 0, padding: 0, height: '100%', background: '#0a090a', fontFamily: '"Noto Sans SC", system-ui, sans-serif' }}>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

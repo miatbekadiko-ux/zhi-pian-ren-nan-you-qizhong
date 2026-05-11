@@ -1,31 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 export function useRequireAuth() {
+  const { status } = useSession();
   const router = useRouter();
-  const [isAuthed, setIsAuthed] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem('isLoggedIn') === 'true') {
-      setIsAuthed(true);
-    } else {
+    if (status === 'unauthenticated') {
       router.replace('/auth');
     }
-  }, [router]);
+  }, [status, router]);
 
-  return isAuthed;
+  return status === 'authenticated';
 }
 
 export function useAuthState() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [email, setEmail] = useState('');
-
-  useEffect(() => {
-    setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
-    setEmail(localStorage.getItem('userEmail') ?? '');
-  }, []);
-
-  return { isLoggedIn, email };
+  const { data: session, status } = useSession();
+  return {
+    isLoggedIn: status === 'authenticated',
+    isLoading: status === 'loading',
+    email: session?.user?.email ?? '',
+    userId: session?.user?.id ?? null,
+  };
 }

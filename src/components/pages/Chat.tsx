@@ -8,26 +8,8 @@ import { Icon } from '@/components/Icon';
 import { characters, Character } from '@/lib/characters';
 import { useAuthState } from '@/lib/useAuth';
 
-const MOCK_REPLIES: Record<string, string[]> = {
-  lin: [
-    '😄 嘿，想我了？', '⛰️ 刚从山顶下来，信号才好。', '说吧，有什么事？',
-    '哈哈，你这个人。', '🌿 周末一起去徒步怎么样？', '我在呢，不用担心。',
-  ],
-  pei: [
-    '嗯。', '有什么事？', '说重点。', '……随便你。',
-    '你不需要懂。', '不必解释。', '知道了。',
-  ],
-  shen: [
-    '😏 哎哟，终于想到我了。', '随便啦，反正你也不懂。', '🙄 哼，一般般吧。',
-    '才不是因为你问才说的。', '你懂什么啊。', '……还行吧，没那么差。',
-  ],
-  gu: [
-    '🎬 嗯，我在。', '你今天过得怎么样？', '✨ 你说的那件事，我记住了。',
-    '慢慢说，不着急。', '我一直在这里。', '你笑起来，很好看。',
-  ],
-};
 
-type Msg = { id: number; role: 'user' | 'ai'; text: string };
+type Msg = { id: number; role: 'user' | 'ai'; text: string; imageUrl?: string | null };
 
 function Avatar({ c, size = 36 }: { c: Character; size?: number }) {
   return (
@@ -80,15 +62,71 @@ function BubbleUser({ text }: { text: string }) {
   );
 }
 
-function BubbleAI({ c, text }: { c: Character; text: string }) {
+function BubbleAI({ c, text, imageUrl }: { c: Character; text: string; imageUrl?: string | null }) {
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stopPlayback = () => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    setPlaying(false);
+  };
+
+  const togglePlay = async () => {
+    if (playing) { stopPlayback(); return; }
+    setPlaying(true);
+
+    // Try real TTS API first
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, characterId: c.id }),
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.onended = () => { URL.revokeObjectURL(url); audioRef.current = null; setPlaying(false); };
+        audio.onerror = () => { URL.revokeObjectURL(url); audioRef.current = null; setPlaying(false); };
+        audio.play();
+        return;
+      }
+    } catch { /* fall through */ }
+
+    // Fallback: browser Web Speech API
+    if (!('speechSynthesis' in window)) { setPlaying(false); return; }
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN';
+    u.onend = () => setPlaying(false);
+    u.onerror = () => setPlaying(false);
+    window.speechSynthesis.speak(u);
+  };
+
   return (
     <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
       <Avatar c={c} size={32} />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
         <div style={{ maxWidth: 380, padding: '10px 14px', background: T.panel2, border: `1px solid ${T.border}`, color: T.text, fontSize: 14, lineHeight: 1.5, borderRadius: '4px 14px 14px 14px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{text}</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 8px', fontSize: 11, color: T.textMute, cursor: 'pointer' }}>
+        {imageUrl && (
+          <div style={{ width: 200, height: 266, borderRadius: 12, overflow: 'hidden', border: `1px solid ${T.border}`, position: 'relative', background: imageUrl === 'placeholder' ? c.grad : '#111' }}>
+            {imageUrl === 'placeholder' ? (
+              <>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 72, opacity: 0.18 }}>{c.emoji}</div>
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '8px 12px', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(6px)', fontSize: 11, color: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: c.accent, flexShrink: 0, display: 'inline-block' }} />
+                  {c.name} 发来了一张照片
+                </div>
+              </>
+            ) : (
+              <img src={imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            )}
+          </div>
+        )}
+        <div onClick={togglePlay} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 8px', fontSize: 11, color: playing ? c.accent : T.textMute, cursor: 'pointer' }}>
           <Icon name="play" size={10} />
-          <span>播放语音</span>
+          <span>{playing ? '播放中…' : '播放语音'}</span>
           <span style={{ color: T.borderHi }}>·</span>
           <span style={{ color: T.pink }}>♡ 收藏</span>
         </div>
@@ -159,18 +197,19 @@ function LoginModal({ c, onClose, onLogin }: { c: Character; onClose: () => void
   );
 }
 
-const PREVIEW_LAST: Record<string, string> = {
-  lin: '明天有空？带你去看一片野花海。',
-  pei: '…随便你。',
-  shen: '又不是给你画的。哼。',
-  gu: '你今天提过的那家面馆，我记下了。',
-};
+function formatMsgTime(iso: string): string {
+  const d = new Date(iso);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) {
+    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+  }
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (d.toDateString() === yesterday.toDateString()) return '昨天';
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
 
-const PREVIEW_TIME: Record<string, string> = {
-  lin: '10:24', pei: '现在', shen: '昨天', gu: '昨天',
-};
-
-let msgId = 0;
+type ConvoPreview = { lastMessagePreview: string | null; updatedAt: string };
 
 export function PageChat() {
   const router = useRouter();
@@ -180,17 +219,51 @@ export function PageChat() {
   const [isTyping, setIsTyping] = useState(false);
   const [input, setInput] = useState('');
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [convoPreviews, setConvoPreviews] = useState<Record<string, ConvoPreview>>({});
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const tempIdRef = useRef(-1);
 
+  const loadConvoPreviews = useCallback(() => {
+    fetch('/api/conversations')
+      .then(r => r.ok ? r.json() : [])
+      .then((list: Array<{ characterId: string; lastMessagePreview: string | null; updatedAt: string }>) => {
+        const map: Record<string, ConvoPreview> = {};
+        for (const c of list) map[c.characterId] = { lastMessagePreview: c.lastMessagePreview, updatedAt: c.updatedAt };
+        setConvoPreviews(map);
+      })
+      .catch(() => {});
+  }, []);
+
+  // Read selected character from localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('selectedCharacterId');
-      if (stored && characters.find(c => c.id === stored)) {
-        setActiveId(stored);
-      }
+    const stored = localStorage.getItem('selectedCharacterId');
+    if (stored && characters.find(c => c.id === stored)) {
+      setActiveId(stored);
     }
   }, []);
+
+  // Load conversation previews when logged in
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    loadConvoPreviews();
+  }, [isLoggedIn, loadConvoPreviews]);
+
+  // Load history from DB when character or login state changes
+  useEffect(() => {
+    if (!isLoggedIn) { setMessages([]); return; }
+    fetch(`/api/chat?characterId=${activeId}`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => {
+        setMessages(data.messages.map((m: { id: number; role: string; content: string; imageUrl?: string | null }) => ({
+          id: m.id,
+          role: (m.role === 'user' ? 'user' : 'ai') as 'user' | 'ai',
+          text: m.content,
+          imageUrl: m.imageUrl,
+        })));
+      })
+      .catch(() => {});
+  }, [activeId, isLoggedIn]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -206,25 +279,38 @@ export function PageChat() {
     setIsTyping(false);
   };
 
-  const sendMessage = useCallback(() => {
+  const sendMessage = useCallback(async () => {
     const text = input.trim();
     if (!text || isTyping) return;
-    if (!isLoggedIn) {
-      setShowLoginModal(true);
-      return;
-    }
+    if (!isLoggedIn) { setShowLoginModal(true); return; }
+
+    const tempId = tempIdRef.current--;
     setInput('');
-    const userMsg: Msg = { id: ++msgId, role: 'user', text };
-    setMessages(prev => [...prev, userMsg]);
+    setMessages(prev => [...prev, { id: tempId, role: 'user', text }]);
     setIsTyping(true);
-    setTimeout(() => {
-      const pool = MOCK_REPLIES[activeId] ?? MOCK_REPLIES['pei'];
-      const reply = pool[Math.floor(Math.random() * pool.length)];
-      const aiMsg: Msg = { id: ++msgId, role: 'ai', text: reply };
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ characterId: activeId, content: text }),
+      });
+      const data = await res.json();
       setIsTyping(false);
-      setMessages(prev => [...prev, aiMsg]);
-    }, 1500);
-  }, [input, isTyping, activeId]);
+      setMessages(prev => [
+        ...prev.filter(m => m.id !== tempId),
+        { id: data.userMessage.id, role: 'user' as const, text: data.userMessage.content },
+        { id: data.aiMessage.id, role: 'ai' as const, text: data.aiMessage.content, imageUrl: data.aiMessage.imageUrl },
+      ]);
+      // Update local preview immediately
+      setConvoPreviews(prev => ({
+        ...prev,
+        [activeId]: { lastMessagePreview: data.aiMessage.content, updatedAt: new Date().toISOString() },
+      }));
+    } catch {
+      setIsTyping(false);
+    }
+  }, [input, isTyping, isLoggedIn, activeId]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -233,11 +319,15 @@ export function PageChat() {
     }
   };
 
-  const conversations = characters.map(c => ({
-    c, last: PREVIEW_LAST[c.id], time: PREVIEW_TIME[c.id],
-    active: c.id === activeId,
-    unread: c.id === 'pei' && activeId !== 'pei' ? 2 : undefined,
-  }));
+  const conversations = characters.map(c => {
+    const preview = convoPreviews[c.id];
+    return {
+      c,
+      last: preview?.lastMessagePreview ?? '还没有消息，快来打招呼吧~',
+      time: preview?.updatedAt ? formatMsgTime(preview.updatedAt) : '',
+      active: c.id === activeId,
+    };
+  });
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', background: T.bg, color: T.text, fontFamily: '"Noto Sans SC", system-ui, sans-serif', overflow: 'hidden' }}>
@@ -285,7 +375,7 @@ export function PageChat() {
           {messages.map(msg =>
             msg.role === 'user'
               ? <BubbleUser key={msg.id} text={msg.text} />
-              : <BubbleAI key={msg.id} c={active} text={msg.text} />
+              : <BubbleAI key={msg.id} c={active} text={msg.text} imageUrl={msg.imageUrl} />
           )}
           {isTyping && <Typing c={active} />}
           <div ref={bottomRef} />
