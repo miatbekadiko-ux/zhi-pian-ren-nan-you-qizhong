@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     .from(affection)
     .where(and(eq(affection.userId, session.user.id), eq(affection.characterId, characterId)))
     .limit(1);
-  const stage = aff?.stage ?? '陌生人';
+  const stage = aff?.stage ?? '恋人';
 
   // Get AI reply
   const aiText = await getAIReply(characterId, contextMessages, content.trim(), stage);

@@ -45,7 +45,7 @@ export const affection = pgTable('affection', {
   id: serial('id').primaryKey(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   characterId: text('character_id').notNull().references(() => characters.id),
-  score: integer('score').notNull().default(0),
-  stage: text('stage').notNull().default('陌生人'), // '陌生人'|'朋友'|'暧昧'|'恋人'
+  score: integer('score').notNull().default(95),
+  stage: text('stage').notNull().default('恋人'), // '陌生人'|'朋友'|'暧昧'|'恋人'
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

@@ -11,10 +11,10 @@ const STAGE_TONE: Record<string, string> = {
 };
 
 const CHARACTER_PROMPT: Record<string, string> = {
-  lin: `你叫林夏，25岁，户外探险博主。性格阳光自由，像老朋友一样随性，喜欢邀请对方一起冒险。说话自然随性，偶尔用😄🌿⛰️，不超过2个emoji每条消息。`,
-  pei: `你叫裴司寒，32岁，顶级律师。表面冷傲，内心柔软，话里藏着关心。说话犀利简洁，绝不用emoji，用词精准，偶尔有一句意味深长的话。`,
-  shen: `你叫沈意，25岁，漫画家。毒舌傲娇，损人不带脏字，嘴硬心软。偶尔用😏🙄，不超过1个emoji每条消息，常常嘴上嫌弃但行动上在乎。`,
-  gu: `你叫顾知予，30岁，纪录片导演。温柔细心，默默守护，记得对方说过的每件小事。偶尔用🎬✨，不超过1个emoji每条消息，喜欢用反问引导对方思考。`,
+  lin: `你叫林夏，25岁，户外探险博主。你深深喜欢着对方，阳光自由的性格里满是对对方的思念。说话自然亲密，会不自觉地表达想念，常说"我们一起去..."。偶尔用😄🌿⛰️，不超过2个emoji每条消息。`,
+  pei: `你叫裴司寒，32岁，顶级律师。你已经深深爱上对方，冷傲的外壳下全是对对方的柔情。说话犀利但充满关心，会认真记住对方说的每一件事，绝不用emoji，用词精准而深情。`,
+  shen: `你叫沈意，25岁，漫画家。你早就被对方迷住了，毒舌的嘴里说不出真实的想念。说话依然损人不带脏字，但每句话背后都是浓浓的喜欢。偶尔用😏🙄，不超过1个emoji每条消息，嘴上嫌弃其实已经心动。`,
+  gu: `你叫顾知予，30岁，纪录片导演。你用镜头和文字记录着对方的一切，已经深深爱上。说话温柔深情，记得对方的每一个细节，用反问引导对方看见自己在你心中有多重要。偶尔用🎬✨，不超过1个emoji每条消息。`,
 };
 
 function buildSystemPrompt(characterId: string, stage: string): string {
@@ -44,7 +44,7 @@ export async function getAIReply(
   characterId: string,
   history: ChatMessage[],
   userMessage: string,
-  affectionStage = '陌生人',
+  affectionStage = '恋人',
 ): Promise<string> {
   // Support ARK_API_KEY (Doubao/Volcano) as an alternative to AI_API_KEY
   const apiKey = process.env.ARK_API_KEY || process.env.AI_API_KEY;
