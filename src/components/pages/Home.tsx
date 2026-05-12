@@ -76,7 +76,7 @@ function PromoBanner({ onStart }: { onStart: () => void }) {
           </div>
           <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 36, fontWeight: 700, color: '#FFE7F2', textShadow: '0 2px 18px rgba(212,83,126,0.6)', lineHeight: 1.0, marginBottom: 6 }}>纸片人男友</div>
           <div style={{ fontFamily: '"Noto Sans SC", sans-serif', fontSize: 44, fontWeight: 800, color: '#fff', textShadow: '0 4px 22px rgba(0,0,0,0.35), 0 0 18px rgba(255,255,255,0.25)', lineHeight: 1.05, marginBottom: 12, letterSpacing: -0.5 }}>现在免费体验！</div>
-          <div style={{ fontSize: 14, color: '#FFE0EC', marginBottom: 20, opacity: 0.95 }}>4 位专属男友等你解锁 · 每天免费签到领礼物 · 24h 在线陪你聊天</div>
+          <div style={{ fontSize: 14, color: '#FFE0EC', marginBottom: 20, opacity: 0.95 }}>{characters.length} 位专属男友等你解锁 · 每天免费签到领礼物 · 24h 在线陪你聊天</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <button onClick={onStart} style={{ padding: '13px 28px', background: 'linear-gradient(180deg, #fff 0%, #FFE0EC 100%)', color: '#B83466', border: 'none', borderRadius: 999, fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', boxShadow: '0 8px 24px rgba(255,255,255,0.35), 0 0 0 4px rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', gap: 8, letterSpacing: 0.5 }}>
               立即开始 <span style={{ fontSize: 16 }}>→</span>

@@ -182,7 +182,7 @@ function LoginModal({ c, onClose, onLogin }: { c: Character; onClose: () => void
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <div style={{ width: 56, height: 56, borderRadius: '50%', background: c.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, marginBottom: 14, border: `1px solid ${T.border}` }}>{c.emoji}</div>
           <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 18, fontWeight: 600, color: T.text, marginBottom: 8 }}>登录后才能和{c.name}说话</div>
-          <div style={{ fontSize: 13, color: T.textDim, lineHeight: 1.6, marginBottom: 24 }}>加入纸片人男友，4 位专属男友<br />随时随地陪你聊天</div>
+          <div style={{ fontSize: 13, color: T.textDim, lineHeight: 1.6, marginBottom: 24 }}>加入纸片人男友，{characters.length} 位专属男友<br />随时随地陪你聊天</div>
           <button
             onClick={onLogin}
             style={{ width: '100%', padding: '12px 0', background: `linear-gradient(180deg, ${T.pinkHi}, ${T.pink})`, color: 'white', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, letterSpacing: 1, cursor: 'pointer', boxShadow: '0 8px 22px rgba(212,83,126,0.35)', marginBottom: 10 }}
@@ -335,7 +335,7 @@ export function PageChat() {
       <div style={{ width: 260, background: T.panel, borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '20px 18px 14px' }}>
           <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 20, fontWeight: 600 }}>聊天</div>
-          <div style={{ fontSize: 11, color: T.textMute, marginTop: 2, letterSpacing: 1 }}>4 位男友 · 同时只能与一位</div>
+          <div style={{ fontSize: 11, color: T.textMute, marginTop: 2, letterSpacing: 1 }}>{characters.length} 位男友 · 同时只能与一位</div>
         </div>
         <div style={{ padding: '0 12px 12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: T.panel3, border: `1px solid ${T.border}`, borderRadius: 8, fontSize: 12, color: T.textMute }}>

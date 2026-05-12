@@ -153,7 +153,7 @@ async function fullTest(variant: typeof AUTH_VARIANTS[number]) {
 
     ws.on('message', (data: Buffer | string, isBinary: boolean) => {
       if (isBinary) {
-        const buf = Buffer.isBuffer(data) ? data : Buffer.from(data as ArrayBuffer);
+        const buf = Buffer.isBuffer(data) ? data : Buffer.from(data as unknown as ArrayBuffer);
         receivedAudio = Buffer.concat([receivedAudio, buf]);
         process.stdout.write(`\r🔊 收到音频 ${(receivedAudio.length / 1024).toFixed(1)} KB`);
       } else {
