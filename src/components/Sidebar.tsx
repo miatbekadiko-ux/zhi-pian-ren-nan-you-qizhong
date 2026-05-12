@@ -60,7 +60,6 @@ export function Sidebar({ active, locked = false }: SidebarProps) {
       })}
       <div style={{ marginTop: 10, padding: '18px 18px', borderRadius: 24, background: 'transparent', border: '4px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer' }} onClick={() => router.push('/settings')}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Icon name="diamond" size={20} color="#8B5CF6" />
           <Icon name="gem" size={20} color="#C9A16E" />
           <span style={{ fontSize: 14, fontWeight: 700, color: '#C9A16E' }}>会员</span>
         </div>

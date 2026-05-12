@@ -191,7 +191,7 @@ export function PageHome() {
       <div style={{ position: 'sticky', top: 0, zIndex: 30, height: 68, padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#111111', borderBottom: `1px solid ${T.border}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontSize: 42, fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: -0.5 }}>
+            <div style={{ fontSize: 24, fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: -0.5 }}>
               纸片人<span style={{ color: T.pink }}>男友</span>
             </div>
           </div>
@@ -199,7 +199,8 @@ export function PageHome() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
           {isLoggedIn ? (
             <>
-              <button onClick={() => router.push('/settings')} type="button" style={{ height: 40, padding: '0 24px', borderRadius: 24, border: '4px solid transparent', borderImage: 'linear-gradient(140deg, #FF4B8B 0%, #8B00FF 100%) 1', background: '#111', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap' }}>
+              <button onClick={() => router.push('/settings')} type="button" style={{ height: 40, padding: '0 24px', borderRadius: 24, border: 'none', background: 'linear-gradient(140deg, #FF4B8B 0%, #8B00FF 100%)', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap', boxShadow: '0 0 0 4px rgba(255, 75, 139, 0.3)' }}>
+                <Icon name="diamond" size={16} color="#8B5CF6" />
                 <span style={{ color: '#fff' }}>高级会员</span>
                 <span style={{ color: '#FF9CD6' }}>7折优惠</span>
               </button>
