@@ -411,11 +411,25 @@ export function PageChat() {
         </div>
       </div>
       <div style={{ width: 280, background: T.panel, borderLeft: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <div style={{ height: 280, background: active.grad, position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 140, opacity: 0.16 }}>{active.emoji}</div>
+        <div style={{ height: 280, position: 'relative', overflow: 'hidden' }}>
+          {active.portraitUrl ? (
+            <img
+              src={active.portraitUrl}
+              alt={active.name}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          ) : (
+            <>
+              <div style={{ position: 'absolute', inset: 0, background: active.grad }} />
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 140, opacity: 0.16 }}>{active.emoji}</div>
+            </>
+          )}
           <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 14px)' }} />
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 100, background: `linear-gradient(180deg, transparent, ${T.panel})` }} />
-          <div style={{ position: 'absolute', top: 12, left: 14, padding: '4px 10px', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(6px)', borderRadius: 999, fontSize: 10, color: T.textDim, letterSpacing: 1 }}>PORTRAIT · 占位图</div>
         </div>
         <div style={{ padding: '18px 20px', flex: 1, overflow: 'auto' }}>
           <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 22, fontWeight: 600 }}>{active.emoji} {active.name}</div>

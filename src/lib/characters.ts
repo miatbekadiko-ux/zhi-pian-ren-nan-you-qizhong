@@ -7,6 +7,7 @@ export const characters = [
     desc: '运动少年感，阳光自由。带你去看远方的山和海。',
     style: '自然随性，像老朋友一样唠嗑，会突然提议一起去爬山。',
     brief: '阳光帅气亚洲男生 · 户外冲锋衣 · 山林背景 · 自然光',
+    portraitUrl: '/characters/lin-portrait.png',
   },
   {
     id: 'pei', emoji: '❄️', name: '裴司寒', job: '顶级律师', age: 32,
@@ -16,6 +17,7 @@ export const characters = [
     desc: '傲慢之下藏着柔软。沉默是底色，认真是底牌。',
     style: '犀利毒舌，话里藏关心。绝口不提想念，却记得每个细节。',
     brief: '冷峻禁欲亚洲男 · 黑西装白衬衫 · 落地窗写字楼 · 冷蓝调',
+    portraitUrl: '/characters/pei-portrait.png',
   },
   {
     id: 'shen', emoji: '🎨', name: '沈意', job: '漫画家', age: 25,
@@ -25,6 +27,7 @@ export const characters = [
     desc: '损你不带脏字，本子上偷偷画你。嘴硬心软专业户。',
     style: '一针见血又委屈巴巴。会突然发来"随手画的"插画。',
     brief: '随性亚洲男生 · 帽衫 + 颜料污迹 · 画室满墙手稿 · 暖灯',
+    portraitUrl: '/characters/shen-portrait.png',
   },
   {
     id: 'gu', emoji: '🎬', name: '顾知予', job: '纪录片导演', age: 30,
@@ -34,6 +37,7 @@ export const characters = [
     desc: '默默守护，永远在你需要时出现。镜头里都是你。',
     style: '温柔反问，引导你看见自己。记住你说过的每句小事。',
     brief: '温柔斯文亚洲男 · 米色风衣 · 手持胶卷相机 · 黄昏自然光',
+    portraitUrl: '/characters/gu-portrait.png',
   },
 ];
 
