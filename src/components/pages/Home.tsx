@@ -24,65 +24,87 @@ function Sparkle({ size = 12, color = '#fff', opacity = 1, style = {} }: { size?
 }
 
 function PromoBanner({ onStart }: { onStart: () => void }) {
+  const groups = React.useMemo(() => {
+    const result: Array<typeof characters[number][]> = [];
+    for (let i = 0; i < characters.length; i += 3) {
+      result.push(characters.slice(i, i + 3));
+    }
+    return result;
+  }, []);
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const activeGroup = groups[activeIndex] || [];
+  const posterPositions = [
+    { left: '0%', top: '16%', width: '46%', transform: 'rotate(-8deg)', zIndex: 1 },
+    { left: '20%', top: '4%', width: '56%', transform: 'rotate(0deg)', zIndex: 3 },
+    { left: '38%', top: '18%', width: '46%', transform: 'rotate(8deg)', zIndex: 2 },
+  ];
+
+  const prevSlide = () => setActiveIndex((value) => (value === 0 ? groups.length - 1 : value - 1));
+  const nextSlide = () => setActiveIndex((value) => (value === groups.length - 1 ? 0 : value + 1));
+
   return (
-    <div style={{ height: 280, position: 'relative', overflow: 'hidden', borderBottom: `1px solid ${T.border}`,
-      background: 'linear-gradient(115deg, #4A0E78 0%, #8B00FF 30%, #D4537E 70%, #FF1493 100%)' }}>
-      <div style={{ position: 'absolute', top: -120, left: '15%', width: 380, height: 380, borderRadius: '50%', background: '#FF6FB5', filter: 'blur(80px)', opacity: 0.55 }} />
-      <div style={{ position: 'absolute', top: -80, right: '10%', width: 320, height: 320, borderRadius: '50%', background: '#FFD23F', filter: 'blur(90px)', opacity: 0.35 }} />
-      <div style={{ position: 'absolute', bottom: -140, left: '40%', width: 420, height: 420, borderRadius: '50%', background: '#7C3DFF', filter: 'blur(110px)', opacity: 0.45 }} />
-      <Sparkle size={20} color="#FFE7A8" opacity={0.9} style={{ position: 'absolute', top: 28, left: '38%' }} />
-      <Sparkle size={12} color="#fff" opacity={0.85} style={{ position: 'absolute', top: 70, left: '52%' }} />
-      <Sparkle size={26} color="#FFD23F" opacity={0.85} style={{ position: 'absolute', bottom: 38, left: '46%' }} />
-      <Sparkle size={10} color="#fff" opacity={0.7} style={{ position: 'absolute', top: 130, right: '36%' }} />
-      <Sparkle size={16} color="#FFB6E1" opacity={0.9} style={{ position: 'absolute', top: 40, right: '8%' }} />
-      <Sparkle size={10} color="#fff" opacity={0.6} style={{ position: 'absolute', bottom: 60, right: '14%' }} />
-      <Sparkle size={14} color="#FFE7A8" opacity={0.8} style={{ position: 'absolute', top: 180, left: '34%' }} />
-      {([
-        { l: '6%', t: 50, s: 8, c: '#FFD23F', o: 0.9 },
-        { l: '10%', t: 200, s: 6, c: '#fff', o: 0.7 },
-        { l: '32%', t: 220, s: 10, c: '#FFB6E1', o: 0.95 },
-        { l: '60%', t: 30, s: 7, c: '#FFE7A8', o: 0.9 },
-        { l: '72%', t: 200, s: 9, c: '#fff', o: 0.7 },
-        { l: '88%', t: 110, s: 12, c: '#FFD23F', o: 0.85 },
-        { l: '94%', t: 200, s: 6, c: '#fff', o: 0.6 },
-      ] as { l: string; t: number; s: number; c: string; o: number }[]).map((b, i) => (
+    <div style={{ minHeight: 220, height: 220, flex: '0 0 220px', marginTop: 24, boxSizing: 'border-box', position: 'relative', zIndex: 0, overflow: 'hidden', borderRadius: 24, background: 'linear-gradient(115deg, #4A0E78 0%, #8B00FF 30%, #D4537E 70%, #FF1493 100%)' }}>
+      <div style={{ position: 'absolute', top: -110, left: '16%', width: 320, height: 320, borderRadius: '50%', background: '#FF6FB5', filter: 'blur(80px)', opacity: 0.5 }} />
+      <div style={{ position: 'absolute', top: -70, right: '12%', width: 260, height: 260, borderRadius: '50%', background: '#FFD23F', filter: 'blur(90px)', opacity: 0.32 }} />
+      <div style={{ position: 'absolute', bottom: -120, left: '42%', width: 380, height: 380, borderRadius: '50%', background: '#7C3DFF', filter: 'blur(110px)', opacity: 0.42 }} />
+      {[
+        { l: '8%', t: 50, s: 10, c: '#FFD23F', o: 0.92 },
+        { l: '12%', t: 190, s: 6, c: '#fff', o: 0.65 },
+        { l: '34%', t: 210, s: 12, c: '#FFB6E1', o: 0.9 },
+        { l: '62%', t: 30, s: 8, c: '#FFE7A8', o: 0.88 },
+        { l: '74%', t: 190, s: 10, c: '#fff', o: 0.65 },
+        { l: '88%', t: 110, s: 14, c: '#FFD23F', o: 0.8 },
+        { l: '96%', t: 200, s: 8, c: '#fff', o: 0.55 },
+      ].map((b, i) => (
         <div key={i} style={{ position: 'absolute', left: b.l, top: b.t, width: b.s, height: b.s, borderRadius: '50%', background: b.c, opacity: b.o, boxShadow: `0 0 ${b.s * 1.5}px ${b.c}` }} />
       ))}
-      {([
-        { l: '8%', t: 110, r: -25, c: '#FFD23F' },
-        { l: '28%', t: 60, r: 35, c: '#fff' },
-        { l: '70%', t: 60, r: -15, c: '#FFE7A8' },
-        { l: '82%', t: 230, r: 30, c: '#fff' },
-      ] as { l: string; t: number; r: number; c: string }[]).map((c, i) => (
+      {[
+        { l: '10%', t: 110, r: -20, c: '#FFD23F' },
+        { l: '30%', t: 62, r: 40, c: '#fff' },
+        { l: '72%', t: 62, r: -18, c: '#FFE7A8' },
+        { l: '84%', t: 230, r: 28, c: '#fff' },
+      ].map((c, i) => (
         <div key={i} style={{ position: 'absolute', left: c.l, top: c.t, width: 16, height: 3, background: c.c, borderRadius: 2, transform: `rotate(${c.r}deg)`, opacity: 0.85 }} />
       ))}
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'stretch', padding: '0 40px 0 0' }}>
-        <div style={{ position: 'relative', width: '46%', height: '100%' }}>
-          <div style={{ position: 'absolute', inset: '20px 0 0 24px', borderRadius: '20px 20px 0 0', background: 'radial-gradient(70% 100% at 50% 100%, rgba(255,255,255,0.18), transparent)', pointerEvents: 'none' }} />
-          <ImageSlot
-            id="promo-trio"
-            shape="rect"
-            fit="cover"
-            position="50% 30%"
-            placeholder="PHOTO · 3 位帅气亚洲男生并排站立 · 节日精致着装 · 全身/半身 · 透明或柔光背景"
-            style={{ position: 'absolute', left: 24, right: 0, top: 20, bottom: 0, width: 'auto', height: 'auto', background: 'transparent' }}
-          />
-          <div style={{ position: 'absolute', left: '15%', right: '5%', bottom: 0, height: 40, background: 'radial-gradient(50% 100% at 50% 100%, rgba(255,210,63,0.55), transparent 70%)', pointerEvents: 'none' }} />
-        </div>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: 32, position: 'relative', zIndex: 2 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, alignSelf: 'flex-start', padding: '5px 12px 5px 8px', borderRadius: 999, background: 'linear-gradient(90deg, #FFD23F, #FFAA1D)', color: '#3a1a04', fontSize: 12, fontWeight: 700, letterSpacing: 1, boxShadow: '0 6px 20px rgba(255,170,29,0.45)', marginBottom: 14 }}>
-            <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#fff', color: '#D4537E', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800 }}>♡</span>
-            限时特惠 · NEW!
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'stretch', padding: '0' }}>
+        <div style={{ position: 'relative', width: '46%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '18px 14px 10px', boxSizing: 'border-box' }}>
+          <div style={{ position: 'absolute', inset: '18px 18px 18px 18px', background: 'rgba(0,0,0,0.16)', borderRadius: 24, filter: 'blur(14px)' }} />
+          <div style={{ position: 'relative', width: '100%', height: '100%', pointerEvents: 'none' }}>
+            {activeGroup.map((c, index) => {
+              const position = posterPositions[index] || posterPositions[1];
+              return (
+                <div key={c.id} style={{ position: 'absolute', left: position.left, top: position.top, width: position.width, transform: position.transform, zIndex: position.zIndex, borderRadius: 24, overflow: 'hidden', background: T.panel2, boxShadow: '0 26px 80px rgba(0,0,0,0.35)' }}>
+                  <ImageSlot
+                    id={`promo-carousel-${activeIndex}-${c.id}`}
+                    shape="rect"
+                    fit="cover"
+                    placeholder={`PHOTO · ${c.name} · ${c.brief}`}
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent' }}
+                  />
+                  <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '44%', background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%)' }} />
+                  <div style={{ position: 'absolute', left: 16, right: 16, bottom: 16, color: '#fff' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.2, textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}>{c.name}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.92)', marginTop: 4 }}>{c.job}</div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 36, fontWeight: 700, color: '#FFE7F2', textShadow: '0 2px 18px rgba(212,83,126,0.6)', lineHeight: 1.0, marginBottom: 6 }}>纸片人男友</div>
-          <div style={{ fontFamily: '"Noto Sans SC", sans-serif', fontSize: 44, fontWeight: 800, color: '#fff', textShadow: '0 4px 22px rgba(0,0,0,0.35), 0 0 18px rgba(255,255,255,0.25)', lineHeight: 1.05, marginBottom: 12, letterSpacing: -0.5 }}>现在免费体验！</div>
-          <div style={{ fontSize: 14, color: '#FFE0EC', marginBottom: 20, opacity: 0.95 }}>{characters.length} 位专属男友等你解锁 · 每天免费签到领礼物 · 24h 在线陪你聊天</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <button onClick={onStart} style={{ padding: '13px 28px', background: 'linear-gradient(180deg, #fff 0%, #FFE0EC 100%)', color: '#B83466', border: 'none', borderRadius: 999, fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', boxShadow: '0 8px 24px rgba(255,255,255,0.35), 0 0 0 4px rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', gap: 8, letterSpacing: 0.5 }}>
-              立即开始 <span style={{ fontSize: 16 }}>→</span>
+          <button onClick={prevSlide} type="button" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', width: 42, height: 42, borderRadius: 999, border: '1px solid rgba(255,255,255,0.24)', background: 'rgba(0,0,0,0.35)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9 }}>
+            <Icon name="arrow" size={18} color="#fff" />
+          </button>
+          <button onClick={nextSlide} type="button" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%) rotate(180deg)', width: 42, height: 42, borderRadius: 999, border: '1px solid rgba(255,255,255,0.24)', background: 'rgba(0,0,0,0.35)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9 }}>
+            <Icon name="arrow" size={18} color="#fff" />
+          </button>
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: 54, position: 'relative', zIndex: 2 }}>
+          <div style={{ fontFamily: '"Noto Sans SC", sans-serif', fontSize: 42, fontWeight: 800, color: '#fff', textShadow: '0 4px 22px rgba(0,0,0,0.35), 0 0 18px rgba(255,255,255,0.25)', lineHeight: 1.05, marginBottom: 30, letterSpacing: -0.5 }}>现在免费体验！</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            <button onClick={onStart} style={{ height: 40, padding: '0 28px', background: 'linear-gradient(180deg, #fff 0%, #FFE0EC 100%)', color: '#B83466', border: 'none', borderRadius: 999, fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', boxShadow: '0 8px 24px rgba(255,255,255,0.35), 0 0 0 4px rgba(255,255,255,0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', letterSpacing: 0.5 }}>
+              立即开始
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#FFE0EC', fontSize: 12 }}>
-              <span style={{ display: 'flex' }}>{[0,1,2,3,4].map(i => <span key={i} style={{ color: '#FFD23F' }}>★</span>)}</span>
+              <span style={{ display: 'flex' }}>{[0, 1, 2, 3, 4].map(i => <span key={i} style={{ color: '#FFD23F' }}>★</span>)}</span>
               <span>已有 12,840 位用户</span>
             </div>
           </div>
@@ -93,9 +115,27 @@ function PromoBanner({ onStart }: { onStart: () => void }) {
   );
 }
 
-function CharacterCard({ c, hover, onChat }: { c: typeof characters[number]; hover?: boolean; onChat: () => void }) {
+function CharacterCard({ c, onChat }: { c: typeof characters[number]; onChat: () => void }) {
+  const [isHover, setIsHover] = React.useState(false);
+  const isNew = c.id === 'kai' || c.id === 'yan';
   return (
-    <div style={{ background: T.panel2, border: `1px solid ${hover ? T.pink : T.border}`, borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: hover ? '0 0 0 1px rgba(212,83,126,0.25), 0 22px 48px rgba(212,83,126,0.14)' : '0 8px 22px rgba(0,0,0,0.35)', transition: 'all 0.2s' }}>
+    <div
+      onMouseEnter={() => setIsHover(true)}
+      onMouseLeave={() => setIsHover(false)}
+      style={{
+        background: T.panel2,
+        border: '1px solid transparent',
+        borderRadius: 24,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: isHover ? '0 28px 70px rgba(212,83,126,0.18)' : '0 8px 22px rgba(0,0,0,0.35)',
+        transition: 'transform 0.28s ease, box-shadow 0.28s ease',
+        transform: isHover ? 'scale(1.02)' : 'scale(1)',
+        cursor: 'pointer',
+      }}
+      onClick={onChat}
+    >
       <div style={{ position: 'relative', height: 380, overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: c.grad }} />
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 14px)' }} />
@@ -107,33 +147,23 @@ function CharacterCard({ c, hover, onChat }: { c: typeof characters[number]; hov
           placeholder={`PHOTO · ${c.name} · ${c.brief}`}
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent' }}
         />
-        <div style={{ position: 'absolute', top: 12, left: 12, padding: '4px 10px', borderRadius: 999, background: 'rgba(15,15,15,0.55)', backdropFilter: 'blur(6px)', fontSize: 11, color: c.accent, display: 'flex', alignItems: 'center', gap: 6, pointerEvents: 'none', zIndex: 2 }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: c.accent }} />
-          在线
-        </div>
-        <div style={{ position: 'absolute', top: 12, right: 12, padding: '4px 10px', borderRadius: 999, background: 'rgba(15,15,15,0.55)', backdropFilter: 'blur(6px)', fontSize: 11, color: T.textDim, pointerEvents: 'none', zIndex: 2 }}>
-          {c.id === 'pei' ? '暧昧期' : c.id === 'gu' ? '朋友' : '陌生人'}
-        </div>
+        {isNew && (
+          <div style={{ position: 'absolute', top: 16, right: 16, padding: '6px 10px', borderRadius: 99, background: 'rgba(255,255,255,0.12)', color: '#fff', fontSize: 11, fontWeight: 700, letterSpacing: 0.5, backdropFilter: 'blur(8px)', zIndex: 4 }}>
+            新
+          </div>
+        )}
         <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 200, background: `linear-gradient(180deg, transparent 0%, rgba(22,20,22,0.55) 45%, ${T.panel2} 100%)`, pointerEvents: 'none', zIndex: 2 }} />
         <div style={{ position: 'absolute', left: 16, right: 16, bottom: 14, pointerEvents: 'none', zIndex: 3 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
-            <span style={{ fontSize: 18, opacity: 0.7 }}>{c.emoji}</span>
-            <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 24, fontWeight: 600, color: 'white', textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}>{c.name}</div>
-            <div style={{ fontSize: 11, color: T.textDim, marginLeft: 'auto' }}>{c.age}岁</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 4 }}>
+            <span style={{ fontSize: 24, fontWeight: 600, color: 'white', textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}>{c.name}</span>
+            <span style={{ fontSize: 24, fontWeight: 500, color: 'rgba(255,255,255,0.9)', letterSpacing: 0.5 }}>{c.age}岁</span>
           </div>
-          <div style={{ fontSize: 12, color: T.textDim }}>{c.job}</div>
         </div>
       </div>
-      <div style={{ padding: '14px 16px 16px' }}>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
-          {c.tags.map(t => (
-            <div key={t} style={{ padding: '3px 9px', borderRadius: 6, background: T.panel3, border: `1px solid ${T.border}`, fontSize: 11, color: T.textDim }}>{t}</div>
-          ))}
+      <div style={{ padding: '18px 18px 24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ fontSize: 13, color: T.textDim, lineHeight: 1.7 }}>{c.story}</div>
         </div>
-        <button onClick={onChat} style={{ width: '100%', padding: '10px 0', background: hover ? `linear-gradient(180deg, ${T.pinkHi}, ${T.pink})` : T.panel3, color: hover ? 'white' : T.text, border: `1px solid ${hover ? 'transparent' : T.border}`, borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: hover ? '0 6px 16px rgba(212,83,126,0.32)' : 'none' }}>
-          <Icon name="chat" size={15} />
-          开始聊天
-        </button>
       </div>
     </div>
   );
@@ -151,42 +181,53 @@ export function PageHome() {
   const navTarget = isLoggedIn ? '/chat' : '/auth';
 
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', background: T.bg, color: T.text, fontFamily: '"Noto Sans SC", system-ui, sans-serif', overflow: 'hidden' }}>
-      <Sidebar active="home" />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Top nav */}
-        <div style={{ height: 52, padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: T.bg, flexShrink: 0 }}>
-          <div style={{ fontFamily: '"Noto Serif SC", serif', fontWeight: 700, fontSize: 18, color: T.text, letterSpacing: 1 }}>纸片人男友</div>
+    <div style={{ width: '100%', height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column', background: T.bg, color: T.text, fontFamily: '"Noto Sans SC", system-ui, sans-serif', overflow: 'hidden' }}>
+      <div style={{ position: 'sticky', top: 0, zIndex: 30, height: 68, padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#111111', borderBottom: `1px solid ${T.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 12, background: `linear-gradient(140deg, ${T.pinkHi}, ${T.pink})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 18, fontWeight: 700 }}>纸</div>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>纸片人男友</div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
           {isLoggedIn ? (
-            <div
-              onClick={() => router.push('/profile')}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 14px 5px 8px', borderRadius: 8, border: `1px solid ${T.border}`, cursor: 'pointer', background: T.panel2 }}
-            >
-              <div style={{ width: 26, height: 26, borderRadius: '50%', background: `linear-gradient(140deg, ${T.pinkHi}, ${T.pink})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: 'white', fontWeight: 700 }}>
-                {email ? email[0].toUpperCase() : '我'}
+            <>
+              <button onClick={() => router.push('/settings')} type="button" style={{ height: 40, padding: '0 24px', borderRadius: 24, border: '2px solid transparent', borderImage: 'linear-gradient(140deg, #FF4B8B 0%, #8B00FF 100%) 1', background: '#111', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap' }}>
+                <span style={{ color: '#fff' }}>高级会员</span>
+                <span style={{ color: '#FF9CD6' }}>7折优惠</span>
+              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, color: '#fff', fontSize: 13, lineHeight: 1.2, minWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: `linear-gradient(140deg, ${T.pinkHi}, ${T.pink})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 16 }}>
+                  {email ? email[0].toUpperCase() : '我'}
+                </div>
+                <span>{email || '我的账户'}</span>
               </div>
-              <span style={{ fontSize: 12, color: T.textDim, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email || '我的'}</span>
-            </div>
+            </>
           ) : (
-            <button onClick={() => router.push('/auth')} style={{ padding: '7px 20px', background: 'transparent', border: `1.5px solid ${T.pink}`, color: T.pink, borderRadius: 8, fontSize: 13, fontWeight: 500, fontFamily: 'inherit', cursor: 'pointer', letterSpacing: 0.5 }}>登录</button>
+            <button onClick={() => router.push('/auth')} type="button" style={{ padding: '12px 24px', borderRadius: 999, border: '2px solid transparent', borderImage: 'linear-gradient(140deg, #FFD700, #FFB347) 1', background: '#111', color: '#FFD700', fontWeight: 700, cursor: 'pointer' }}>
+              登录 / 注册
+            </button>
           )}
         </div>
-        <PromoBanner onStart={() => router.push(navTarget)} />
-        <div style={{ flex: 1, padding: '28px 36px', overflow: 'auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-            <div style={{ fontSize: 12, letterSpacing: 2, color: T.textMute, textTransform: 'uppercase' }}>选择角色 · CAST</div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Chip>全部</Chip>
-              <Chip muted>最近聊过</Chip>
-              <Chip muted>好感度</Chip>
+      </div>
+      <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
+        <Sidebar active="home" />
+        <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+          <div style={{ padding: '0 44px' }}>
+            <PromoBanner onStart={() => router.push(navTarget)} />
+          </div>
+          <div style={{ flex: 1, padding: '32px 44px' }}>
+            <div style={{ marginBottom: 20, maxWidth: 680 }}>
+              <div style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.2, color: '#fff' }}>
+                遇见你的 <span style={{ color: T.pinkHi }}>AI男友</span>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 22 }}>
+              {characters.map(c => (
+                <CharacterCard key={c.id} c={c} onChat={() => handleChat(c.id)} />
+              ))}
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 18 }}>
-            {characters.map((c, i) => (
-              <CharacterCard key={c.id} c={c} hover={i === 1} onChat={() => handleChat(c.id)} />
-            ))}
-          </div>
-          <div style={{ marginTop: 14, fontSize: 11, color: T.textMute, letterSpacing: 0.5 }}>提示 · 拖拽真实人物照片到任一卡片即可替换占位图（每张卡片可独立保存）</div>
         </div>
       </div>
     </div>

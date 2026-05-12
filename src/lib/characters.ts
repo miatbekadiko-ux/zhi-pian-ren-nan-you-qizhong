@@ -7,6 +7,7 @@ export const characters = [
     desc: '运动少年感，阳光自由。带你去看远方的山和海。',
     style: '自然随性，像老朋友一样唠嗑，会突然提议一起去爬山。',
     brief: '阳光帅气亚洲男生 · 户外冲锋衣 · 山林背景 · 自然光',
+    story: '户外探险博主，那个带你去看日出、让你第一次觉得世界很大的男孩……',
     portraitUrl: '/characters/lin-portrait.png',
   },
   {
@@ -17,6 +18,7 @@ export const characters = [
     desc: '傲慢之下藏着柔软。沉默是底色，认真是底牌。',
     style: '犀利毒舌，话里藏关心。绝口不提想念，却记得每个细节。',
     brief: '冷峻禁欲亚洲男 · 黑西装白衬衫 · 落地窗写字楼 · 冷蓝调',
+    story: '顶级律师，在法庭上冷若冰霜，却只在深夜发消息问你"吃了吗"……',
     portraitUrl: '/characters/pei-portrait.png',
   },
   {
@@ -27,6 +29,7 @@ export const characters = [
     desc: '损你不带脏字，本子上偷偷画你。嘴硬心软专业户。',
     style: '一针见血又委屈巴巴。会突然发来"随手画的"插画。',
     brief: '随性亚洲男生 · 帽衫 + 颜料污迹 · 画室满墙手稿 · 暖灯',
+    story: '漫画家，把你画进了故事里，却从来不敢告诉你……',
     portraitUrl: '/characters/shen-portrait.png',
   },
   {
@@ -37,6 +40,7 @@ export const characters = [
     desc: '默默守护，永远在你需要时出现。镜头里都是你。',
     style: '温柔反问，引导你看见自己。记住你说过的每句小事。',
     brief: '温柔斯文亚洲男 · 米色风衣 · 手持胶卷相机 · 黄昏自然光',
+    story: '纪录片导演，走遍世界记录别人的故事，唯独想为你停下来……',
     portraitUrl: '/characters/gu-portrait.png',
   },
   {
@@ -47,6 +51,7 @@ export const characters = [
     desc: '数据和逻辑是他的语言，用冷静和效率表达在乎。',
     style: '说话简练而挑逗，喜欢用科技隐喻情感。',
     brief: '极简商务风 · 短黑发 · 码农手感 · 办公室夜景 · 冷白灯',
+    story: '科技创业者，永远在分析逻辑，直到遇见你这个他算不清楚的变量……',
     portraitUrl: '/characters/kai-portrait.png',
   },
   {
@@ -57,6 +62,7 @@ export const characters = [
     desc: '镜头下每个瞬间都像诗，他喜欢把你拍成故事。',
     style: '说话温柔，句子里带光和细节。',
     brief: '高级时尚感 · 轻薄毛衣 · 相机挂脖 · 城市黄昏 · 软糯光',
+    story: '时尚摄影师，镜头里见过无数美丽，他说你是唯一让他放下相机的人……',
     portraitUrl: '/characters/zhou-portrait.png',
   },
   {
@@ -67,6 +73,7 @@ export const characters = [
     desc: '健身房里他是你的动力，生活里他是你的暖男。',
     style: '语气干脆，喜欢用行动力证明关心。',
     brief: '运动短袖 · 哑铃 · 阳光汗水 · 健康线条 · 健身房',
+    story: '私人教练，训练时严格得像魔鬼，转身递给你的却是一瓶提前冰好的水……',
     portraitUrl: '/characters/cao-portrait.png',
   },
   {
@@ -77,6 +84,7 @@ export const characters = [
     desc: '用旋律记住你的每一句话，是会说话的夜色。',
     style: '说话低柔，喜欢用音乐比喻情绪。',
     brief: '黑色皮衣 · 录音棚 · 夜色灯光 · 音乐设备 · 深邃眼神',
+    story: '音乐制作人，那首没有发布的歌，他说只写给一个人听——就是你……',
     portraitUrl: '/characters/yan-portrait.png',
   },
 ];

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { T } from '@/lib/tokens';
 import { Icon } from './Icon';
@@ -18,6 +19,7 @@ interface SidebarProps {
 
 export function Sidebar({ active, locked = false }: SidebarProps) {
   const router = useRouter();
+  const [hovered, setHovered] = React.useState<string | null>(null);
   const items = [
     { key: 'home', icon: 'home' },
     { key: 'chat', icon: 'chat' },
@@ -25,43 +27,43 @@ export function Sidebar({ active, locked = false }: SidebarProps) {
     { key: 'gear', icon: 'gear' },
   ];
   return (
-    <div style={{ width: 64, background: T.panel, borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 0 18px', gap: 6, flexShrink: 0 }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(140deg, ${T.pinkHi}, ${T.pink})`, color: 'white', fontFamily: '"Noto Serif SC", serif', fontWeight: 700, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(212,83,126,0.35)', marginBottom: 12 }}>纸</div>
+    <div style={{ width: 220, background: '#0d0d0d', borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', alignItems: 'stretch', padding: '24px 18px 24px', gap: 16, flexShrink: 0 }}>
       {items.map(it => {
         const isActive = !locked && it.key === active;
+        const isHover = hovered === it.key;
+        const overlay = isActive || isHover;
         return (
-          <div
+          <button
+            type="button"
             key={it.key}
             onClick={() => !locked && router.push(NAV_MAP[it.key])}
+            onMouseEnter={() => setHovered(it.key)}
+            onMouseLeave={() => setHovered(null)}
             style={{
-              width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: isActive ? T.pinkSoft : 'transparent',
-              color: isActive ? T.pink : (locked ? '#3a3437' : T.textMute),
+              width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', borderRadius: 20,
+              background: overlay ? 'rgba(255,255,255,0.08)' : 'transparent',
+              color: T.text,
+              border: 'none',
               cursor: locked ? 'default' : 'pointer',
+              textAlign: 'left',
+              fontSize: 15,
+              fontWeight: 500,
+              transition: 'background 0.2s ease',
             }}
           >
-            <Icon name={it.icon} size={19} />
-          </div>
+            <div style={{ width: 38, height: 38, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: overlay ? 'rgba(255,255,255,0.08)' : T.panel2, color: locked ? '#3a3437' : T.textMute, transition: 'background 0.2s ease' }}>
+              <Icon name={it.icon} size={20} />
+            </div>
+            <span>{it.key === 'home' ? '首页' : it.key === 'chat' ? '聊天' : it.key === 'user' ? '我的' : '设置'}</span>
+          </button>
         );
       })}
-      <div style={{ flex: 1 }} />
-      <div style={{ position: 'relative', width: 40, height: 40 }}>
-        <div style={{ position: 'absolute', inset: -6, borderRadius: 14, background: 'radial-gradient(circle, rgba(212,83,126,0.55) 0%, rgba(139,0,255,0.35) 50%, transparent 75%)', filter: 'blur(6px)', pointerEvents: 'none' }} />
-        <div title="升级 Premium" style={{
-          position: 'relative', width: 40, height: 40, borderRadius: 11,
-          background: 'linear-gradient(140deg, #FFB347 0%, #D4537E 45%, #8B00FF 100%)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#FFF6CC',
-          boxShadow: active === 'vip'
-            ? '0 6px 22px rgba(212,83,126,0.7), inset 0 1px 0 rgba(255,255,255,0.5), 0 0 0 2px rgba(255,255,255,0.25)'
-            : '0 4px 16px rgba(212,83,126,0.5), inset 0 1px 0 rgba(255,255,255,0.4)',
-          cursor: 'pointer',
-          transform: active === 'vip' ? 'scale(1.05)' : 'none',
-          transition: 'all 0.2s',
-        }}>
-          <Icon name="gem" size={18} color="#FFF6CC" />
-          <div style={{ position: 'absolute', top: -3, right: -3, minWidth: 14, height: 14, padding: '0 4px', borderRadius: 7, background: '#FFD23F', color: '#3a1a04', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid ' + T.panel, letterSpacing: 0.3 }}>VIP</div>
+      <div style={{ marginTop: 10, padding: '18px 18px', borderRadius: 20, background: 'transparent', border: '2px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer' }} onClick={() => router.push('/settings')}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Icon name="gem" size={20} color="#C9A16E" />
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#C9A16E' }}>会员</span>
         </div>
+        <span style={{ padding: '6px 12px', borderRadius: 999, background: '#E61B3E', color: '#fff', fontSize: 13, fontWeight: 700 }}>-70%</span>
       </div>
     </div>
   );
