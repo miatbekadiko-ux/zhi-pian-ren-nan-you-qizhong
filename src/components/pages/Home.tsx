@@ -26,8 +26,8 @@ function Sparkle({ size = 12, color = '#fff', opacity = 1, style = {} }: { size?
 function PromoBanner({ onStart }: { onStart: () => void }) {
   const groups = React.useMemo(() => {
     const result: Array<typeof characters[number][]> = [];
-    for (let i = 0; i < characters.length; i += 3) {
-      result.push(characters.slice(i, i + 3));
+    for (let i = 0; i < characters.length; i += 2) {
+      result.push(characters.slice(i, i + 2));
     }
     return result;
   }, []);
@@ -36,8 +36,14 @@ function PromoBanner({ onStart }: { onStart: () => void }) {
   const posterPositions = [
     { left: '0%', top: '16%', width: '46%', transform: 'rotate(-8deg)', zIndex: 1 },
     { left: '20%', top: '4%', width: '56%', transform: 'rotate(0deg)', zIndex: 3 },
-    { left: '38%', top: '18%', width: '46%', transform: 'rotate(8deg)', zIndex: 2 },
   ];
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((value) => (value === groups.length - 1 ? 0 : value + 1));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [groups.length]);
 
   const prevSlide = () => setActiveIndex((value) => (value === 0 ? groups.length - 1 : value - 1));
   const nextSlide = () => setActiveIndex((value) => (value === groups.length - 1 ? 0 : value + 1));
@@ -104,7 +110,7 @@ function PromoBanner({ onStart }: { onStart: () => void }) {
               立即开始
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#FFE0EC', fontSize: 12 }}>
-              <span style={{ display: 'flex' }}>{[0, 1, 2, 3, 4].map(i => <span key={i} style={{ color: '#FFD23F' }}>★</span>)}</span>
+              <span style={{ display: 'flex' }}>{[1, 2, 3, 4].map(i => <span key={i} style={{ color: '#FFD23F' }}>★</span>)}</span>
               <span>已有 12,840 位用户</span>
             </div>
           </div>
@@ -154,7 +160,7 @@ function CharacterCard({ c, onChat }: { c: typeof characters[number]; onChat: ()
         )}
         <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 200, background: `linear-gradient(180deg, transparent 0%, rgba(22,20,22,0.55) 45%, ${T.panel2} 100%)`, pointerEvents: 'none', zIndex: 2 }} />
         <div style={{ position: 'absolute', left: 16, right: 16, bottom: 14, pointerEvents: 'none', zIndex: 3 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 2 }}>
             <span style={{ fontSize: 24, fontWeight: 600, color: 'white', textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}>{c.name}</span>
             <span style={{ fontSize: 24, fontWeight: 500, color: 'rgba(255,255,255,0.9)', letterSpacing: 0.5 }}>{c.age}岁</span>
           </div>
@@ -184,15 +190,16 @@ export function PageHome() {
     <div style={{ width: '100%', height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column', background: T.bg, color: T.text, fontFamily: '"Noto Sans SC", system-ui, sans-serif', overflow: 'hidden' }}>
       <div style={{ position: 'sticky', top: 0, zIndex: 30, height: 68, padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#111111', borderBottom: `1px solid ${T.border}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 12, background: `linear-gradient(140deg, ${T.pinkHi}, ${T.pink})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 18, fontWeight: 700 }}>纸</div>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>纸片人男友</div>
+            <div style={{ fontSize: 42, fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: -0.5 }}>
+              纸片人<span style={{ color: T.pink }}>男友</span>
+            </div>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
           {isLoggedIn ? (
             <>
-              <button onClick={() => router.push('/settings')} type="button" style={{ height: 40, padding: '0 24px', borderRadius: 24, border: '2px solid transparent', borderImage: 'linear-gradient(140deg, #FF4B8B 0%, #8B00FF 100%) 1', background: '#111', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap' }}>
+              <button onClick={() => router.push('/settings')} type="button" style={{ height: 40, padding: '0 24px', borderRadius: 24, border: '4px solid transparent', borderImage: 'linear-gradient(140deg, #FF4B8B 0%, #8B00FF 100%) 1', background: '#111', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap' }}>
                 <span style={{ color: '#fff' }}>高级会员</span>
                 <span style={{ color: '#FF9CD6' }}>7折优惠</span>
               </button>

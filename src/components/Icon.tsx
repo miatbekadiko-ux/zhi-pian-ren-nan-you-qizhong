@@ -41,6 +41,11 @@ export function Icon({ name, size = 20, color = 'currentColor' }: IconProps) {
         <path d="M5.5 3h13l3.5 5-10 13L2 8l3.5-5zM7 4l-2.7 4H9L7 4zm10 0l-2 4h4.7L17 4zm-5 0l-2 4h4l-2-4zM4.7 9l5.5 8.5L8.4 9H4.7zm5.7 0l1.6 9.5L13.6 9h-3.2zm5.2 0l-1.8 8.5L19.3 9h-3.7z"/>
       </svg>
     );
+    case 'diamond': return (
+      <svg viewBox="0 0 24 24" width={size} height={size} fill={color} style={{ transform: 'rotate(60deg)' }}>
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+    );
     default: return null;
   }
 }

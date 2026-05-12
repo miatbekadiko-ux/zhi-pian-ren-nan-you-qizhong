@@ -43,7 +43,7 @@ export function Sidebar({ active, locked = false }: SidebarProps) {
               width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', borderRadius: 20,
               background: overlay ? 'rgba(255,255,255,0.08)' : 'transparent',
               color: T.text,
-              border: 'none',
+              border: `1px solid ${T.border}`,
               cursor: locked ? 'default' : 'pointer',
               textAlign: 'left',
               fontSize: 15,
@@ -58,8 +58,9 @@ export function Sidebar({ active, locked = false }: SidebarProps) {
           </button>
         );
       })}
-      <div style={{ marginTop: 10, padding: '18px 18px', borderRadius: 20, background: 'transparent', border: '2px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer' }} onClick={() => router.push('/settings')}>
+      <div style={{ marginTop: 10, padding: '18px 18px', borderRadius: 24, background: 'transparent', border: '4px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer' }} onClick={() => router.push('/settings')}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Icon name="diamond" size={20} color="#8B5CF6" />
           <Icon name="gem" size={20} color="#C9A16E" />
           <span style={{ fontSize: 14, fontWeight: 700, color: '#C9A16E' }}>会员</span>
         </div>
