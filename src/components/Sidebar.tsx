@@ -15,9 +15,10 @@ const NAV_MAP: Record<string, string> = {
 interface SidebarProps {
   active: string;
   locked?: boolean;
+  onVipClick?: () => void;
 }
 
-export function Sidebar({ active, locked = false }: SidebarProps) {
+export function Sidebar({ active, locked = false, onVipClick }: SidebarProps) {
   const router = useRouter();
   const [hovered, setHovered] = React.useState<string | null>(null);
   const items = [
@@ -58,7 +59,7 @@ export function Sidebar({ active, locked = false }: SidebarProps) {
           </button>
         );
       })}
-      <div style={{ marginTop: 10, padding: '18px 18px', borderRadius: 24, background: 'transparent', border: '4px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer' }} onClick={() => router.push('/settings')}>
+      <div style={{ marginTop: 10, padding: '18px 18px', borderRadius: 24, background: 'transparent', border: '4px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer' }} onClick={() => onVipClick ? onVipClick() : router.push('/settings')}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Icon name="gem" size={20} color="#C9A16E" />
           <span style={{ fontSize: 14, fontWeight: 700, color: '#C9A16E' }}>会员</span>

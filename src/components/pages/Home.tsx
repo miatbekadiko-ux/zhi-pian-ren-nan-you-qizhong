@@ -8,6 +8,7 @@ import { Icon } from '@/components/Icon';
 import { ImageSlot } from '@/components/ImageSlot';
 import { characters } from '@/lib/characters';
 import { useAuthState } from '@/lib/useAuth';
+import { PremiumModal } from '@/components/PremiumModal';
 
 function Chip({ children, muted }: { children: React.ReactNode; muted?: boolean }) {
   return (
@@ -178,6 +179,7 @@ function CharacterCard({ c, onChat }: { c: typeof characters[number]; onChat: ()
 export function PageHome() {
   const router = useRouter();
   const { isLoggedIn, email } = useAuthState();
+  const [premiumOpen, setPremiumOpen] = React.useState(false);
 
   const handleChat = (characterId: string) => {
     localStorage.setItem('selectedCharacterId', characterId);
@@ -188,6 +190,7 @@ export function PageHome() {
 
   return (
     <div style={{ width: '100%', height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column', background: T.bg, color: T.text, fontFamily: '"Noto Sans SC", system-ui, sans-serif', overflow: 'hidden' }}>
+      <PremiumModal open={premiumOpen} onClose={() => setPremiumOpen(false)} />
       <div style={{ position: 'sticky', top: 0, zIndex: 30, height: 68, padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#111111', borderBottom: `1px solid ${T.border}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -199,7 +202,7 @@ export function PageHome() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
           {isLoggedIn ? (
             <>
-              <button onClick={() => router.push('/settings')} type="button" style={{ height: 40, padding: '0 24px', borderRadius: 24, border: 'none', background: 'linear-gradient(140deg, #FF4B8B 0%, #8B00FF 100%)', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap', boxShadow: '0 0 0 4px rgba(255, 75, 139, 0.3)' }}>
+              <button onClick={() => setPremiumOpen(true)} type="button" style={{ height: 40, padding: '0 24px', borderRadius: 24, border: 'none', background: 'linear-gradient(140deg, #FF4B8B 0%, #8B00FF 100%)', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap', boxShadow: '0 0 0 4px rgba(255, 75, 139, 0.3)' }}>
                 <Icon name="diamond" size={16} color="#8B5CF6" />
                 <span style={{ color: '#fff' }}>高级会员</span>
                 <span style={{ color: '#FF9CD6' }}>7折优惠</span>
@@ -219,7 +222,7 @@ export function PageHome() {
         </div>
       </div>
       <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
-        <Sidebar active="home" />
+        <Sidebar active="home" onVipClick={() => setPremiumOpen(true)} />
         <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
           <div style={{ padding: '0 44px' }}>
             <PromoBanner onStart={() => router.push(navTarget)} />
