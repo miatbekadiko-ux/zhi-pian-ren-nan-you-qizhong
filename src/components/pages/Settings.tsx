@@ -4,6 +4,8 @@ import React from 'react';
 import { T } from '@/lib/tokens';
 import { Sidebar } from '@/components/Sidebar';
 import { Icon } from '@/components/Icon';
+import { TopNav } from '@/components/TopNav';
+import { PremiumModal } from '@/components/PremiumModal';
 
 function Toggle({ on }: { on?: boolean }) {
   return (
@@ -56,30 +58,35 @@ function SettingsGroup({ title, children }: { title: string; children: React.Rea
 }
 
 export function PageSettings() {
+  const [premiumOpen, setPremiumOpen] = React.useState(false);
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', background: T.bg, color: T.text, fontFamily: '"Noto Sans SC", system-ui, sans-serif', overflow: 'hidden' }}>
-      <Sidebar active="gear" />
-      <div style={{ flex: 1, padding: '36px 48px', overflow: 'auto' }}>
-        <div style={{ maxWidth: 520 }}>
-          <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 28, fontWeight: 600, marginBottom: 4 }}>设置</div>
-          <div style={{ fontSize: 13, color: T.textMute, marginBottom: 28 }}>调整偏好与账号选项。</div>
-          <SettingsGroup title="偏好">
-            <SettingRow icon="globe" title="语言" sub="界面显示语言" right={<SegToggle options={['中文', 'English']} active={0} />} />
-            <SettingRow icon="bell" title="消息通知" sub="男友发消息时提醒" right={<Toggle on />} />
-            <SettingRow icon="volume" title="自动播放语音" sub="收到消息自动播放 TTS" right={<Toggle />} />
-          </SettingsGroup>
-          <div style={{ height: 22 }} />
-          <SettingsGroup title="聊天体验">
-            <SettingRow icon="cal" title="每日签到提醒" sub="每天 21:00 推送一次" right={<Toggle on />} />
-            <SettingRow icon="chat" title="敏感内容过滤" sub="角色自动温柔转移话题" right={<Toggle on />} />
-          </SettingsGroup>
-          <div style={{ height: 22 }} />
-          <SettingsGroup title="账号">
-            <SettingRow icon="trash" title="清空聊天记录" sub="删除所有角色的对话历史" right={<Icon name="arrow" size={14} color={T.textMute} />} muted />
-            <SettingRow icon="logout" title="退出登录" pink right={<Icon name="arrow" size={14} color={T.pink} />} />
-          </SettingsGroup>
-          <div style={{ marginTop: 28, fontSize: 11, color: T.textMute, textAlign: 'center', letterSpacing: 1 }}>
-            纸片人男友 · v0.1.0 (MVP) · made with ♡
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: T.bg, color: T.text, fontFamily: '"Noto Sans SC", system-ui, sans-serif', overflow: 'hidden' }}>
+      <PremiumModal open={premiumOpen} onClose={() => setPremiumOpen(false)} />
+      <TopNav onPremiumClick={() => setPremiumOpen(true)} />
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
+        <Sidebar active="gear" onVipClick={() => setPremiumOpen(true)} />
+        <div style={{ flex: 1, padding: '36px 48px', overflow: 'auto' }}>
+          <div style={{ maxWidth: 640, margin: '0 auto' }}>
+            <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>设置</div>
+            <div style={{ fontSize: 13, color: T.textMute, marginBottom: 28 }}>调整偏好与账号选项。</div>
+            <SettingsGroup title="偏好">
+              <SettingRow icon="globe" title="语言" sub="界面显示语言" right={<SegToggle options={['中文', 'English']} active={0} />} />
+              <SettingRow icon="bell" title="消息通知" sub="男友发消息时提醒" right={<Toggle on />} />
+              <SettingRow icon="volume" title="自动播放语音" sub="收到消息自动播放 TTS" right={<Toggle />} />
+            </SettingsGroup>
+            <div style={{ height: 22 }} />
+            <SettingsGroup title="聊天体验">
+              <SettingRow icon="cal" title="每日签到提醒" sub="每天 21:00 推送一次" right={<Toggle on />} />
+              <SettingRow icon="chat" title="敏感内容过滤" sub="角色自动温柔转移话题" right={<Toggle on />} />
+            </SettingsGroup>
+            <div style={{ height: 22 }} />
+            <SettingsGroup title="账号">
+              <SettingRow icon="trash" title="清空聊天记录" sub="删除所有角色的对话历史" right={<Icon name="arrow" size={14} color={T.textMute} />} muted />
+              <SettingRow icon="logout" title="退出登录" pink right={<Icon name="arrow" size={14} color={T.pink} />} />
+            </SettingsGroup>
+            <div style={{ marginTop: 28, fontSize: 11, color: T.textMute, textAlign: 'center', letterSpacing: 1 }}>
+              纸片人男友 · v0.1.0 (MVP) · made with ♡
+            </div>
           </div>
         </div>
       </div>

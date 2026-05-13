@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "generate:banners": "npx tsx scripts/generate-banner-images.ts",
+    "generate:banners:preview": "npx tsx scripts/generate-banner-images.ts --dry-run"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",

@@ -8,6 +8,7 @@ import { Icon } from '@/components/Icon';
 import { characters } from '@/lib/characters';
 import { useAuthState } from '@/lib/useAuth';
 import { PremiumModal } from '@/components/PremiumModal';
+import { TopNav } from '@/components/TopNav';
 
 const BANNER_CSS = `
   @keyframes pb-in-r  { from { opacity:0; transform:translateX(48px); } to { opacity:1; transform:none; } }
@@ -16,106 +17,134 @@ const BANNER_CSS = `
   @keyframes pb-out-r { from { opacity:1; transform:none; } to { opacity:0; transform:translateX(48px); } }
 `;
 
-type PosterChar = { id: string; portraitUrl?: string; grad: string; emoji: string };
-
-// Both characters occupy the left 2/3; text lives in the right 1/3.
-// The seam between portraits is dissolved with a matching atmospheric color,
-// making the two images read as one continuous scene.
-function SceneBg({ left, right, tone }: { left: PosterChar; right: PosterChar; tone: 'rose' | 'night' }) {
-  const seamColor  = tone === 'rose' ? 'rgba(155,45,115,0.88)'  : 'rgba(8,16,40,0.92)';
-  const baseBg     = tone === 'rose'
-    ? 'linear-gradient(135deg, #1c0832 0%, #3d1050 50%, #150624 100%)'
-    : 'linear-gradient(135deg, #050810 0%, #0e1828 50%, #080c18 100%)';
-  const textAreaBg = tone === 'rose' ? 'rgba(16,4,28,0.97)' : 'rgba(5,8,18,0.97)';
-  const toneGrade  = tone === 'rose'
-    ? 'linear-gradient(135deg, rgba(210,70,140,0.22) 0%, rgba(150,50,200,0.18) 60%, transparent 100%)'
-    : 'linear-gradient(135deg, rgba(15,35,80,0.32) 0%, rgba(25,55,100,0.25) 60%, transparent 100%)';
-
-  return (
-    <>
-      {/* Atmospheric base */}
-      <div style={{ position: 'absolute', inset: 0, background: baseBg }} />
-
-      {/* Left character — left ~35% */}
-      <div style={{ position: 'absolute', left: 0, top: 0, width: '35%', height: '100%', overflow: 'hidden' }}>
-        {left.portraitUrl
-          ? <img src={left.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
-          : <div style={{ width: '100%', height: '100%', background: left.grad }} />}
-        {/* Right edge dissolves into seam color — no hard cut */}
-        <div style={{ position: 'absolute', top: 0, right: 0, width: '40%', height: '100%', background: `linear-gradient(to right, transparent, ${seamColor})` }} />
-      </div>
-
-      {/* Right character — 31 % to 67 % (overlaps the seam zone) */}
-      <div style={{ position: 'absolute', left: '31%', top: 0, width: '36%', height: '100%', overflow: 'hidden' }}>
-        {right.portraitUrl
-          ? <img src={right.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
-          : <div style={{ width: '100%', height: '100%', background: right.grad }} />}
-        {/* Left edge blends out of the same seam color */}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '28%', height: '100%', background: `linear-gradient(to left, transparent, ${seamColor})` }} />
-        {/* Right edge fades into the text area background */}
-        <div style={{ position: 'absolute', top: 0, right: 0, width: '54%', height: '100%', background: `linear-gradient(to right, transparent, ${textAreaBg})` }} />
-      </div>
-
-      {/* Unified color-grade overlay on character area */}
-      <div style={{ position: 'absolute', left: 0, top: 0, width: '67%', height: '100%', background: toneGrade }} />
-
-      {/* Subtle city-light glow for night tone */}
-      {tone === 'night' && (
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 25% 50%, rgba(60,120,255,0.07), transparent 52%)' }} />
-      )}
-
-      {/* Solid text-area background (right 1/3) */}
-      <div style={{ position: 'absolute', right: 0, top: 0, width: '35%', height: '100%', background: textAreaBg }} />
-
-      {/* Global bottom vignette */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.42) 0%, transparent 52%)' }} />
-    </>
-  );
-}
-
-function Poster1({ left, right, anim, isEnter, onStart }: { left: PosterChar; right: PosterChar; anim: string; isEnter: boolean; onStart: () => void }) {
-  return (
-    <div style={{ position: 'absolute', inset: 0, animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents: isEnter ? 'auto' : 'none', overflow: 'hidden' }}>
-      <SceneBg left={left} right={right} tone="rose" />
-      {/* RIGHT 1/3 — serif light, right-aligned */}
-      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '36%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', padding: '0 48px 0 16px', textAlign: 'right', zIndex: 5 }}>
-        <div style={{ fontFamily: '"Noto Serif SC", Georgia, "Times New Roman", serif', fontSize: 44, fontWeight: 300, color: '#fff', lineHeight: 1.1, marginBottom: 34, letterSpacing: -0.5, textShadow: '0 2px 28px rgba(0,0,0,0.45)' }}>
-          现在免费体验！
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.68)', fontSize: 12, marginBottom: 24, justifyContent: 'flex-end' }}>
-          <span style={{ display: 'flex' }}>{[1, 2, 3, 4].map(i => <span key={i} style={{ color: '#FFD23F' }}>★</span>)}</span>
-          <span>已有 12,840 位用户</span>
-        </div>
-        <button onClick={onStart} style={{ height: 44, padding: '0 30px', background: 'transparent', border: '1.5px solid rgba(255,255,255,0.58)', color: '#fff', borderRadius: 999, fontSize: 14, fontWeight: 300, fontFamily: '"Noto Serif SC", Georgia, serif', cursor: 'pointer', letterSpacing: 2 }}>
-          立即开始
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Poster2({ left, right, anim, isEnter, onNavigate }: { left: PosterChar; right: PosterChar; anim: string; isEnter: boolean; onNavigate: (id: string) => void }) {
-  return (
-    <div style={{ position: 'absolute', inset: 0, animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents: isEnter ? 'auto' : 'none', overflow: 'hidden' }}>
-      <SceneBg left={left} right={right} tone="night" />
-      {/* RIGHT 1/3 — heavy sans-serif, left-aligned within text panel */}
-      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '36%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', padding: '0 32px 0 30px', zIndex: 5 }}>
-        <div style={{ fontFamily: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif', fontSize: 34, fontWeight: 900, color: '#fff', lineHeight: 1.28, marginBottom: 22, letterSpacing: 0, textShadow: '0 2px 18px rgba(0,0,0,0.55)', maxWidth: 265 }}>
-          你有多久，没被人真正在意过
-        </div>
-        <div style={{ width: 48, height: 2, background: 'rgba(255,255,255,0.42)', marginBottom: 28 }} />
-        <button onClick={() => onNavigate(left.id)} style={{ height: 46, padding: '0 28px', background: '#D4537E', border: 'none', color: '#fff', borderRadius: 999, fontSize: 15, fontWeight: 700, fontFamily: '"Noto Sans SC", sans-serif', cursor: 'pointer', boxShadow: '0 8px 28px rgba(212,83,126,0.5)', letterSpacing: 1 }}>
-          去见见他
-        </button>
-      </div>
-    </div>
-  );
-}
-
 const POSTER_PAIRS = [
-  { leftId: 'lin', rightId: 'pei' },
-  { leftId: 'kai', rightId: 'yan' },
+  { ids: ['lin', 'kai'] },
+  { ids: ['cao', 'pei', 'yan'] },
 ] as const;
+
+type PosterProps = {
+  ids: string[];
+  anim: string;
+  isEnter: boolean;
+  posterIndex: number;
+  onStart: () => void;
+  onNavigate: (id: string) => void;
+};
+
+function Poster({ ids, anim, isEnter, posterIndex, onStart, onNavigate }: PosterProps) {
+  const StarRow = () => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 12 }}>
+      <span style={{ display: 'flex' }}>
+        {[1, 2, 3, 4].map(i => (
+          <span key={i} style={{ color: '#FFD23F', textShadow: '0 0 6px rgba(255,210,63,0.7)' }}>★</span>
+        ))}
+      </span>
+      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>已有 12,840 位用户</span>
+    </div>
+  );
+
+  if (posterIndex === 0) {
+    const lin = characters.find(c => c.id === ids[0]);
+    const kai = characters.find(c => c.id === ids[1]);
+
+    return (
+      <div style={{ position: 'absolute', inset: 0, animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents: isEnter ? 'auto' : 'none', overflow: 'hidden', display: 'flex' }}>
+        {/* Base */}
+        <div style={{ position: 'absolute', inset: 0, background: '#06000e' }} />
+        {/* Neon atmosphere */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 8% 50%, rgba(212,83,126,0.5) 0%, transparent 45%), radial-gradient(ellipse at 38% 60%, rgba(139,0,255,0.35) 0%, transparent 45%)' }} />
+
+        {/* Characters — left 62% */}
+        <div style={{ position: 'absolute', left: 0, top: 0, width: '62%', height: '100%' }}>
+          {/* Kai — background */}
+          <div style={{ position: 'absolute', left: 0, top: 0, width: '52%', height: '100%', opacity: 0.55, filter: 'brightness(0.7)' }}>
+            {kai?.portraitUrl
+              ? <img src={kai.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
+              : <div style={{ width: '100%', height: '100%', background: kai?.grad }} />}
+          </div>
+          <div style={{ position: 'absolute', right: 0, top: 0, width: '60%', height: '100%', background: 'linear-gradient(to right, transparent, #06000e)' }} />
+
+          {/* Lin — foreground main */}
+          <div style={{ position: 'absolute', left: '12%', top: 0, width: '62%', height: '100%' }}>
+            {lin?.portraitUrl
+              ? <img src={lin.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
+              : <div style={{ width: '100%', height: '100%', background: lin?.grad }} />}
+          </div>
+          <div style={{ position: 'absolute', right: 0, top: 0, width: '50%', height: '100%', background: 'linear-gradient(to right, transparent, #06000e)' }} />
+        </div>
+
+        {/* Text area — right 38% */}
+        <div style={{ position: 'absolute', right: 0, top: 0, width: '38%', height: '100%', background: '#06000e', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 28px', zIndex: 5 }}>
+          <StarRow />
+          <div style={{ fontFamily: '"Noto Sans SC", "PingFang SC", sans-serif', fontSize: 32, fontWeight: 900, color: '#fff', lineHeight: 1.15, marginBottom: 10, textShadow: '0 0 20px rgba(212,83,126,0.9), 0 0 50px rgba(212,83,126,0.5)' }}>
+            现在<br />免费体验！
+          </div>
+          <div style={{ width: 32, height: 2, background: 'rgba(212,83,126,0.9)', marginBottom: 12, boxShadow: '0 0 8px rgba(212,83,126,0.6)' }} />
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 18, lineHeight: 1.5 }}>
+            立即加入，开始你的专属故事
+          </div>
+          <button onClick={onStart} style={{ height: 34, padding: '0 20px', background: 'linear-gradient(135deg, #E96A92, #D4537E)', color: 'white', borderRadius: 999, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(212,83,126,0.5)', alignSelf: 'flex-start' }}>
+            立即开始
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // posterIndex === 1: cao(gao) + pei + yan
+  const yan = characters.find(c => c.id === ids[2]);
+  const pei = characters.find(c => c.id === ids[1]);
+  const gao = characters.find(c => c.id === ids[0]);
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents: isEnter ? 'auto' : 'none', overflow: 'hidden', display: 'flex' }}>
+      {/* Base */}
+      <div style={{ position: 'absolute', inset: 0, background: '#000412' }} />
+      {/* Neon atmosphere */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 10% 45%, rgba(0,110,255,0.45) 0%, transparent 42%), radial-gradient(ellipse at 40% 55%, rgba(80,0,255,0.3) 0%, transparent 40%)' }} />
+
+      {/* Characters — left 62% */}
+      <div style={{ position: 'absolute', left: 0, top: 0, width: '62%', height: '100%' }}>
+        {/* Yan — left background */}
+        <div style={{ position: 'absolute', left: 0, top: '8%', width: '30%', height: '84%', opacity: 0.65, filter: 'brightness(0.7)' }}>
+          {yan?.portraitUrl
+            ? <img src={yan.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
+            : <div style={{ width: '100%', height: '100%', background: yan?.grad }} />}
+        </div>
+
+        {/* Gao — right background, behind pei */}
+        <div style={{ position: 'absolute', left: '28%', top: '12%', width: '26%', height: '76%', opacity: 0.6, filter: 'brightness(0.7)' }}>
+          {gao?.portraitUrl
+            ? <img src={gao.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
+            : <div style={{ width: '100%', height: '100%', background: gao?.grad }} />}
+        </div>
+
+        {/* Pei — center main */}
+        <div style={{ position: 'absolute', left: '10%', top: 0, width: '52%', height: '100%' }}>
+          {pei?.portraitUrl
+            ? <img src={pei.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
+            : <div style={{ width: '100%', height: '100%', background: pei?.grad }} />}
+        </div>
+        <div style={{ position: 'absolute', right: 0, top: 0, width: '50%', height: '100%', background: 'linear-gradient(to right, transparent, #000412)' }} />
+      </div>
+
+      {/* Text area — right 38% */}
+      <div style={{ position: 'absolute', right: 0, top: 0, width: '38%', height: '100%', background: '#000412', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 28px', zIndex: 5 }}>
+        <StarRow />
+        <div style={{ fontFamily: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif', fontSize: 30, fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: 10, textShadow: '0 0 20px rgba(0,160,255,0.95), 0 0 50px rgba(0,100,255,0.55)' }}>
+          你有多久，<br />没被在意过
+        </div>
+        <div style={{ width: 32, height: 2, background: 'rgba(0,200,255,0.9)', marginBottom: 12, boxShadow: '0 0 8px rgba(0,200,255,0.6)' }} />
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 18, lineHeight: 1.5 }}>
+          他们一直在等你
+        </div>
+        <button onClick={() => onNavigate(ids[1])} style={{ height: 34, padding: '0 20px', background: 'linear-gradient(135deg, #D4537E, #FF1580)', color: 'white', borderRadius: 999, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(212,83,126,0.5)', alignSelf: 'flex-start' }}>
+          去见见他们
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function PromoBanner({ onStart, onNavigate }: { onStart: () => void; onNavigate: (id: string) => void }) {
   const [idx, setIdx] = React.useState(0);
@@ -149,18 +178,14 @@ function PromoBanner({ onStart, onNavigate }: { onStart: () => void; onNavigate:
   const renderPoster = (pIdx: number, isEnter: boolean, key: React.Key) => {
     const pair = POSTER_PAIRS[pIdx];
     if (!pair) return null;
-    const left  = characters.find(c => c.id === pair.leftId)!;
-    const right = characters.find(c => c.id === pair.rightId)!;
-    const anim  = isEnter ? enterAnim : exitAnim;
-    return pIdx === 0
-      ? <Poster1 key={key} left={left} right={right} anim={anim} isEnter={isEnter} onStart={onStart} />
-      : <Poster2 key={key} left={left} right={right} anim={anim} isEnter={isEnter} onNavigate={onNavigate} />;
+    const anim = isEnter ? enterAnim : exitAnim;
+    return <Poster key={key} ids={[...pair.ids]} anim={anim} isEnter={isEnter} posterIndex={pIdx} onStart={onStart} onNavigate={onNavigate} />;
   };
 
   return (
     <>
       <style>{BANNER_CSS}</style>
-      <div style={{ height: 360, marginTop: 24, position: 'relative', overflow: 'hidden', borderRadius: 24, background: '#07050c' }}>
+      <div style={{ height: 220, marginTop: 24, position: 'relative', overflow: 'hidden', borderRadius: 24, background: '#06000e' }}>
         {exitIdx !== null && renderPoster(exitIdx, false, `exit-${exitIdx}-${animKey}`)}
         {renderPoster(idx, true, `enter-${idx}-${animKey}`)}
 
@@ -238,7 +263,7 @@ function CharacterCard({ c, onChat }: { c: typeof characters[number]; onChat: ()
 
 export function PageHome() {
   const router = useRouter();
-  const { isLoggedIn, email } = useAuthState();
+  const { isLoggedIn } = useAuthState();
   const [premiumOpen, setPremiumOpen] = React.useState(false);
 
   const handleChat = (characterId: string) => {
@@ -251,36 +276,7 @@ export function PageHome() {
   return (
     <div style={{ width: '100%', height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column', background: T.bg, color: T.text, fontFamily: '"Noto Sans SC", system-ui, sans-serif', overflow: 'hidden' }}>
       <PremiumModal open={premiumOpen} onClose={() => setPremiumOpen(false)} />
-      <div style={{ position: 'sticky', top: 0, zIndex: 30, height: 68, padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#111111', borderBottom: `1px solid ${T.border}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontSize: 24, fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: -0.5 }}>
-              纸片人<span style={{ color: T.pink }}>男友</span>
-            </div>
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-          {isLoggedIn ? (
-            <>
-              <button onClick={() => setPremiumOpen(true)} type="button" style={{ height: 40, padding: '0 24px', borderRadius: 24, border: 'none', background: 'linear-gradient(140deg, #FF4B8B 0%, #8B00FF 100%)', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap', boxShadow: '0 0 0 4px rgba(255, 75, 139, 0.3)' }}>
-                <Icon name="diamond" size={16} color="#8B5CF6" />
-                <span style={{ color: '#fff' }}>高级会员</span>
-                <span style={{ color: '#FF9CD6' }}>7折优惠</span>
-              </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, color: '#fff', fontSize: 13, lineHeight: 1.2, minWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                <div style={{ width: 40, height: 40, borderRadius: '50%', background: `linear-gradient(140deg, ${T.pinkHi}, ${T.pink})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 16 }}>
-                  {email ? email[0].toUpperCase() : '我'}
-                </div>
-                <span>{email || '我的账户'}</span>
-              </div>
-            </>
-          ) : (
-            <button onClick={() => router.push('/auth')} type="button" style={{ padding: '12px 24px', borderRadius: 999, border: '2px solid transparent', borderImage: 'linear-gradient(140deg, #FFD700, #FFB347) 1', background: '#111', color: '#FFD700', fontWeight: 700, cursor: 'pointer' }}>
-              登录 / 注册
-            </button>
-          )}
-        </div>
-      </div>
+      <TopNav onPremiumClick={() => setPremiumOpen(true)} />
       <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
         <Sidebar active="home" onVipClick={() => setPremiumOpen(true)} />
         <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>

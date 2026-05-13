@@ -8,6 +8,7 @@ import { Icon } from '@/components/Icon';
 import { characters, Character } from '@/lib/characters';
 import { useAuthState } from '@/lib/useAuth';
 import { PremiumModal } from '@/components/PremiumModal';
+import { TopNav } from '@/components/TopNav';
 
 const CHAT_CSS = `
   @keyframes typing-dot {
@@ -203,7 +204,7 @@ type ConvoPreview = { lastMessagePreview: string | null; updatedAt: string };
 
 export function PageChat() {
   const router = useRouter();
-  const { isLoggedIn, email } = useAuthState();
+  const { isLoggedIn } = useAuthState();
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [activeId, setActiveId] = useState<string>('pei');
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -372,33 +373,7 @@ export function PageChat() {
       <PremiumModal open={premiumOpen} onClose={() => setPremiumOpen(false)} />
       <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: T.bg, color: T.text, fontFamily: '"Noto Sans SC", system-ui, sans-serif', overflow: 'hidden' }}>
 
-        {/* ── Top navbar (identical to home) ── */}
-        <div style={{ flexShrink: 0, height: 68, padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#111111', borderBottom: `1px solid ${T.border}`, zIndex: 30 }}>
-          <div style={{ fontSize: 24, fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: -0.5 }}>
-            纸片人<span style={{ color: T.pink }}>男友</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-            {isLoggedIn ? (
-              <>
-                <button onClick={() => setPremiumOpen(true)} type="button" style={{ height: 40, padding: '0 24px', borderRadius: 24, border: 'none', background: 'linear-gradient(140deg, #FF4B8B 0%, #8B00FF 100%)', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap', boxShadow: '0 0 0 4px rgba(255,75,139,0.3)' }}>
-                  <Icon name="diamond" size={16} color="#8B5CF6" />
-                  <span style={{ color: '#fff' }}>高级会员</span>
-                  <span style={{ color: '#FF9CD6' }}>7折优惠</span>
-                </button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14, color: '#fff', fontSize: 13, minWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: `linear-gradient(140deg, ${T.pinkHi}, ${T.pink})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 16 }}>
-                    {email ? email[0].toUpperCase() : '我'}
-                  </div>
-                  <span>{email || '我的账户'}</span>
-                </div>
-              </>
-            ) : (
-              <button onClick={() => router.push('/auth')} type="button" style={{ padding: '12px 24px', borderRadius: 999, border: '2px solid transparent', borderImage: 'linear-gradient(140deg, #FFD700, #FFB347) 1', background: '#111', color: '#FFD700', fontWeight: 700, cursor: 'pointer' }}>
-                登录 / 注册
-              </button>
-            )}
-          </div>
-        </div>
+        <TopNav onPremiumClick={() => setPremiumOpen(true)} />
 
         {/* ── Content row below navbar ── */}
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
@@ -409,7 +384,7 @@ export function PageChat() {
           {/* Col 2: Conversation list */}
           <div style={{ width: 260, background: T.panel, borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
             <div style={{ padding: '20px 18px 14px', flexShrink: 0 }}>
-              <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 20, fontWeight: 600 }}>聊天</div>
+              <div style={{ fontSize: 20, fontWeight: 700 }}>聊天</div>
               <div style={{ fontSize: 11, color: T.textMute, marginTop: 2, letterSpacing: 1 }}>
                 {conversations.length > 0 ? `${conversations.length} 条对话记录` : '去首页选一位男友开始聊天吧'}
               </div>
