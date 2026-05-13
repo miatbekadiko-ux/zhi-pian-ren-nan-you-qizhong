@@ -18,10 +18,10 @@ export function Icon({ name, size = 20, color = 'currentColor' }: IconProps) {
     strokeLinejoin: 'round' as const,
   };
   switch (name) {
-    case 'home': return <svg {...common}><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>;
-    case 'chat': return <svg {...common}><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/></svg>;
-    case 'user': return <svg {...common}><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>;
-    case 'gear': return <svg {...common}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>;
+    case 'home': return <svg viewBox="0 0 24 24" width={size} height={size} fill={color}><path d="M10.707 2.293a1 1 0 0 1 1.414 0l7.293 7.293A1 1 0 0 1 19 11h-1v9a1 1 0 0 1-1 1h-4v-5h-2v5H7a1 1 0 0 1-1-1v-9H5a1 1 0 0 1-.707-1.707l6.414-6.414z"/></svg>;
+    case 'chat': return <svg viewBox="0 0 24 24" width={size} height={size} fill={color}><path d="M2 4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7l-5 4V4z"/></svg>;
+    case 'user': return <svg viewBox="0 0 24 24" width={size} height={size} fill={color}><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm-7 8a7 7 0 0 1 14 0H5z"/></svg>;
+    case 'gear': return <svg viewBox="0 0 24 24" width={size} height={size} fill={color}><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.94-2.06a7.07 7.07 0 0 0 .06-.94c0-.32-.03-.64-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.63l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7 7 0 0 0-1.62-.94l-.36-2.54A.48.48 0 0 0 15 3h-3.84a.48.48 0 0 0-.48.41l-.36 2.54a7 7 0 0 0-1.62.94l-2.39-.96a.49.49 0 0 0-.61.22L3.78 9.47a.48.48 0 0 0 .12.63l2.03 1.58c-.04.3-.06.63-.06.94s.02.64.06.94L3.9 15.14a.48.48 0 0 0-.12.63l1.92 3.32c.12.22.38.3.61.22l2.39-.96c.5.36 1.04.67 1.62.94l.36 2.54c.06.24.27.41.48.41H15a.48.48 0 0 0 .48-.41l.36-2.54a7 7 0 0 0 1.62-.94l2.39.96c.23.08.49 0 .61-.22l1.92-3.32a.48.48 0 0 0-.12-.63l-2.03-1.58z"/></svg>;
     case 'send': return <svg {...common}><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>;
     case 'play': return <svg viewBox="0 0 24 24" width={size} height={size} fill={color} stroke="none"><polygon points="6 4 20 12 6 20 6 4"/></svg>;
     case 'eye': return <svg {...common}><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>;

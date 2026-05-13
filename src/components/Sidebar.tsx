@@ -48,7 +48,7 @@ export function Sidebar({ active, locked = false, collapsed = false, onVipClick 
                 width: 44, height: 44, borderRadius: 14,
                 background: overlay ? 'rgba(212,83,126,0.18)' : 'transparent',
                 border: `1px solid ${overlay ? T.pink : 'transparent'}`,
-                color: overlay ? T.pink : T.textMute,
+                color: overlay ? T.pink : 'rgba(255,255,255,0.75)',
                 cursor: locked ? 'default' : 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'background 0.2s ease, color 0.2s ease',
@@ -86,22 +86,21 @@ export function Sidebar({ active, locked = false, collapsed = false, onVipClick 
             onMouseLeave={() => setHovered(null)}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', borderRadius: 20,
-              background: overlay ? 'rgba(255,255,255,0.08)' : 'transparent',
-              color: T.text,
-              border: `1px solid ${T.border}`,
+              background: overlay ? 'rgba(255,255,255,0.10)' : 'transparent',
+              border: overlay ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.06)',
               cursor: locked ? 'default' : 'pointer',
               textAlign: 'left', fontSize: 15, fontWeight: 500,
               transition: 'background 0.2s ease',
             }}
           >
-            <div style={{ width: 38, height: 38, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: overlay ? 'rgba(255,255,255,0.08)' : T.panel2, color: locked ? '#3a3437' : T.textMute, transition: 'background 0.2s ease' }}>
+            <div style={{ width: 38, height: 38, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: overlay ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)', color: locked ? '#3a3437' : overlay ? '#ffffff' : 'rgba(255,255,255,0.75)', transition: 'background 0.2s ease' }}>
               <Icon name={it.icon} size={20} />
             </div>
-            <span>{it.label}</span>
+            <span style={{ color: overlay ? '#ffffff' : 'rgba(255,255,255,0.75)' }}>{it.label}</span>
           </button>
         );
       })}
-      <div style={{ marginTop: 10, padding: '18px 18px', borderRadius: 24, background: 'transparent', border: '4px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer' }} onClick={() => onVipClick ? onVipClick() : router.push('/settings')}>
+      <div style={{ marginTop: 10, padding: '18px 18px', borderRadius: 20, background: 'transparent', border: '1.5px solid rgba(201,161,110,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer' }} onClick={() => onVipClick ? onVipClick() : router.push('/settings')}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Icon name="gem" size={20} color="#C9A16E" />
           <span style={{ fontSize: 14, fontWeight: 700, color: '#C9A16E' }}>会员</span>

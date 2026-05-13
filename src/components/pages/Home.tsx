@@ -56,21 +56,24 @@ function Poster({ ids, anim, isEnter, posterIndex, onStart, onNavigate }: Poster
 
         {/* Characters — left 62% */}
         <div style={{ position: 'absolute', left: 0, top: 0, width: '62%', height: '100%' }}>
-          {/* Kai — background */}
-          <div style={{ position: 'absolute', left: 0, top: 0, width: '52%', height: '100%', opacity: 0.55, filter: 'brightness(0.7)' }}>
+          {/* Kai — back layer */}
+          <div style={{ position: 'absolute', left: 0, top: 0, width: '48%', height: '100%' }}>
             {kai?.portraitUrl
               ? <img src={kai.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
               : <div style={{ width: '100%', height: '100%', background: kai?.grad }} />}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #06000e 0%, transparent 30%, transparent 60%, #06000e 100%)' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 55%, #06000e 100%)' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)' }} />
           </div>
-          <div style={{ position: 'absolute', right: 0, top: 0, width: '60%', height: '100%', background: 'linear-gradient(to right, transparent, #06000e)' }} />
 
-          {/* Lin — foreground main */}
-          <div style={{ position: 'absolute', left: '12%', top: 0, width: '62%', height: '100%' }}>
+          {/* Lin — front layer */}
+          <div style={{ position: 'absolute', left: '15%', top: 0, width: '60%', height: '100%' }}>
             {lin?.portraitUrl
               ? <img src={lin.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
               : <div style={{ width: '100%', height: '100%', background: lin?.grad }} />}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 50%, #06000e 100%)' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 55%, #06000e 100%)' }} />
           </div>
-          <div style={{ position: 'absolute', right: 0, top: 0, width: '50%', height: '100%', background: 'linear-gradient(to right, transparent, #06000e)' }} />
         </div>
 
         {/* Text area — right 38% */}
@@ -105,27 +108,34 @@ function Poster({ ids, anim, isEnter, posterIndex, onStart, onNavigate }: Poster
 
       {/* Characters — left 62% */}
       <div style={{ position: 'absolute', left: 0, top: 0, width: '62%', height: '100%' }}>
-        {/* Yan — left background */}
-        <div style={{ position: 'absolute', left: 0, top: '8%', width: '30%', height: '84%', opacity: 0.65, filter: 'brightness(0.7)' }}>
+        {/* Yan — far left back */}
+        <div style={{ position: 'absolute', left: 0, top: 0, width: '32%', height: '100%' }}>
           {yan?.portraitUrl
             ? <img src={yan.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
             : <div style={{ width: '100%', height: '100%', background: yan?.grad }} />}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #000412 0%, transparent 30%, transparent 60%, #000412 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 55%, #000412 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
         </div>
 
-        {/* Gao — right background, behind pei */}
-        <div style={{ position: 'absolute', left: '28%', top: '12%', width: '26%', height: '76%', opacity: 0.6, filter: 'brightness(0.7)' }}>
+        {/* Cao — far right back */}
+        <div style={{ position: 'absolute', right: 0, top: 0, width: '32%', height: '100%' }}>
           {gao?.portraitUrl
             ? <img src={gao.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
             : <div style={{ width: '100%', height: '100%', background: gao?.grad }} />}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, #000412 0%, transparent 30%, transparent 60%, #000412 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 55%, #000412 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
         </div>
 
-        {/* Pei — center main */}
-        <div style={{ position: 'absolute', left: '10%', top: 0, width: '52%', height: '100%' }}>
+        {/* Pei — center front */}
+        <div style={{ position: 'absolute', left: '14%', top: 0, width: '52%', height: '100%' }}>
           {pei?.portraitUrl
             ? <img src={pei.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
             : <div style={{ width: '100%', height: '100%', background: pei?.grad }} />}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 55%, #000412 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 55%, #000412 100%)' }} />
         </div>
-        <div style={{ position: 'absolute', right: 0, top: 0, width: '50%', height: '100%', background: 'linear-gradient(to right, transparent, #000412)' }} />
       </div>
 
       {/* Text area — right 38% */}
