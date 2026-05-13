@@ -15,18 +15,62 @@ const NAV_MAP: Record<string, string> = {
 interface SidebarProps {
   active: string;
   locked?: boolean;
+  collapsed?: boolean;
   onVipClick?: () => void;
 }
 
-export function Sidebar({ active, locked = false, onVipClick }: SidebarProps) {
+export function Sidebar({ active, locked = false, collapsed = false, onVipClick }: SidebarProps) {
   const router = useRouter();
   const [hovered, setHovered] = React.useState<string | null>(null);
   const items = [
-    { key: 'home', icon: 'home' },
-    { key: 'chat', icon: 'chat' },
-    { key: 'user', icon: 'user' },
-    { key: 'gear', icon: 'gear' },
+    { key: 'home', icon: 'home', label: '首页' },
+    { key: 'chat', icon: 'chat', label: '聊天' },
+    { key: 'user', icon: 'user', label: '我的' },
+    { key: 'gear', icon: 'gear', label: '设置' },
   ];
+
+  if (collapsed) {
+    return (
+      <div style={{ width: 60, background: '#0d0d0d', borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 0', gap: 8, flexShrink: 0 }}>
+        {items.map(it => {
+          const isActive = !locked && it.key === active;
+          const isHover = hovered === it.key;
+          const overlay = isActive || isHover;
+          return (
+            <button
+              type="button"
+              key={it.key}
+              onClick={() => !locked && router.push(NAV_MAP[it.key])}
+              onMouseEnter={() => setHovered(it.key)}
+              onMouseLeave={() => setHovered(null)}
+              title={it.label}
+              style={{
+                width: 44, height: 44, borderRadius: 14,
+                background: overlay ? 'rgba(212,83,126,0.18)' : 'transparent',
+                border: `1px solid ${overlay ? T.pink : 'transparent'}`,
+                color: overlay ? T.pink : T.textMute,
+                cursor: locked ? 'default' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'background 0.2s ease, color 0.2s ease',
+              }}
+            >
+              <Icon name={it.icon} size={20} />
+            </button>
+          );
+        })}
+        <div style={{ flex: 1 }} />
+        <button
+          type="button"
+          title="会员"
+          onClick={() => onVipClick ? onVipClick() : router.push('/settings')}
+          style={{ width: 44, height: 44, borderRadius: 14, background: 'transparent', border: '1px solid rgba(201,161,110,0.3)', color: '#C9A16E', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Icon name="gem" size={20} color="#C9A16E" />
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div style={{ width: 220, background: '#0d0d0d', borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', alignItems: 'stretch', padding: '24px 18px 24px', gap: 16, flexShrink: 0 }}>
       {items.map(it => {
@@ -46,16 +90,14 @@ export function Sidebar({ active, locked = false, onVipClick }: SidebarProps) {
               color: T.text,
               border: `1px solid ${T.border}`,
               cursor: locked ? 'default' : 'pointer',
-              textAlign: 'left',
-              fontSize: 15,
-              fontWeight: 500,
+              textAlign: 'left', fontSize: 15, fontWeight: 500,
               transition: 'background 0.2s ease',
             }}
           >
             <div style={{ width: 38, height: 38, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: overlay ? 'rgba(255,255,255,0.08)' : T.panel2, color: locked ? '#3a3437' : T.textMute, transition: 'background 0.2s ease' }}>
               <Icon name={it.icon} size={20} />
             </div>
-            <span>{it.key === 'home' ? '首页' : it.key === 'chat' ? '聊天' : it.key === 'user' ? '我的' : '设置'}</span>
+            <span>{it.label}</span>
           </button>
         );
       })}
