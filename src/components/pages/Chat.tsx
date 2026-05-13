@@ -204,8 +204,11 @@ export function PageChat() {
   const [input, setInput] = useState('');
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [convoPreviews, setConvoPreviews] = useState<Record<string, ConvoPreview>>({});
+  const [panelOpen, setPanelOpen] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const tempIdRef = useRef(-1);
 
   const loadConvoPreviews = useCallback(() => {
@@ -326,6 +329,21 @@ export function PageChat() {
     }
   };
 
+  // Close three-dot menu when clicking outside
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [menuOpen]);
+
+  const resetChat = useCallback(() => {
+    setMenuOpen(false);
+    setMessages([]);
+  }, []);
+
   // Sort conversations by most recent interaction
   const conversations = characters.map(c => {
     const preview = convoPreviews[c.id];
@@ -372,7 +390,7 @@ export function PageChat() {
           </div>
         </div>
 
-        {/* ── Four-column layout ── */}
+        {/* ── Content row below navbar ── */}
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
 
           {/* Col 1: Collapsed icon sidebar */}
@@ -394,85 +412,139 @@ export function PageChat() {
                 <ConvoRow key={row.c.id} {...row} onClick={() => switchCharacter(row.c.id)} />
               ))}
             </div>
-            {/* Bottom user section intentionally removed */}
           </div>
 
-          {/* Col 3: Chat main area */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: T.bg, minWidth: 0 }}>
-            {/* Character mini-header */}
-            <div style={{ height: 58, padding: '0 22px', display: 'flex', alignItems: 'center', borderBottom: `1px solid ${T.border}`, gap: 12, background: T.panel, flexShrink: 0 }}>
+          {/* Col 3+4: Right big area — flex column */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+
+            {/* ── Shared character header spanning chat + info panel ── */}
+            <div style={{ height: 58, padding: '0 16px 0 22px', display: 'flex', alignItems: 'center', borderBottom: `1px solid ${T.border}`, background: T.panel, flexShrink: 0, gap: 12 }}>
               <Avatar c={active} size={34} />
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 500, color: T.text }}>{active.name}</div>
-                <div style={{ fontSize: 11, color: active.accent, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 15, fontWeight: 500, color: T.text, display: 'flex', alignItems: 'baseline', gap: 0 }}>
+                  {active.name}
+                  <span style={{ fontSize: 13, fontWeight: 400, color: T.textDim, marginLeft: 14 }}>{active.age}岁</span>
+                </div>
+                <div style={{ fontSize: 11, color: active.accent, display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
                   <span style={{ width: 6, height: 6, background: active.accent, borderRadius: '50%', display: 'inline-block' }} />在线
                 </div>
               </div>
-            </div>
-            {/* Messages */}
-            <div style={{ flex: 1, overflow: 'auto', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <DateSep label="今天" />
-              {messages.length === 0 && (
-                <div style={{ textAlign: 'center', color: T.textMute, fontSize: 13, marginTop: 20 }}>和{active.name}说些什么吧~</div>
-              )}
-              {messages.map(msg => {
-                if (msg.role === 'user') return <BubbleUser key={msg.id} text={msg.text} />;
-                return (
-                  <React.Fragment key={msg.id}>
-                    <BubbleAI c={active} text={msg.text} imageUrl={msg.imageUrl} imgState={msg.imgState} />
-                    {msg.imageUrl && msg.imgState === 'loading' && <ImageLoadingBubble c={active} />}
-                  </React.Fragment>
-                );
-              })}
-              {isTyping && <Typing c={active} />}
-              <div ref={bottomRef} />
-            </div>
-            {/* Input area — gift/camera buttons removed */}
-            <div style={{ padding: '12px 22px 16px', borderTop: `1px solid ${T.border}`, background: T.panel, flexShrink: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, background: T.panel2, border: `1px solid ${T.border}`, borderRadius: 14, padding: '6px 8px' }}>
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={e => setInput(e.target.value.slice(0, 500))}
-                  onKeyDown={handleKeyDown}
-                  placeholder={`和${active.name}说些什么…`}
-                  rows={1}
-                  style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: T.text, fontSize: 14, fontFamily: 'inherit', resize: 'none', padding: '10px 8px', lineHeight: 1.5, maxHeight: 120, overflowY: 'auto' }}
-                />
-                <div style={{ fontSize: 11, color: T.textMute, padding: '0 4px', flexShrink: 0 }}>{input.length}/500</div>
+
+              {/* Right action buttons */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+
+                {/* Three-dot menu */}
+                <div ref={menuRef} style={{ position: 'relative' }}>
+                  <button
+                    onClick={() => setMenuOpen(v => !v)}
+                    type="button"
+                    style={{ width: 36, height: 36, borderRadius: 8, background: 'transparent', border: `1px solid ${T.border}`, color: T.textMute, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, letterSpacing: 1 }}
+                  >···</button>
+                  {menuOpen && (
+                    <div style={{ position: 'absolute', top: 42, right: 0, width: 148, background: T.panel2, border: `1px solid ${T.border}`, borderRadius: 10, overflow: 'hidden', zIndex: 50, boxShadow: '0 8px 28px rgba(0,0,0,0.45)' }}>
+                      <button
+                        onClick={resetChat}
+                        type="button"
+                        style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', color: T.text, fontSize: 13, textAlign: 'left', cursor: 'pointer', display: 'block' }}
+                      >重置聊天</button>
+                      <div style={{ height: 1, background: T.border }} />
+                      <button
+                        onClick={resetChat}
+                        type="button"
+                        style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', color: '#f87171', fontSize: 13, textAlign: 'left', cursor: 'pointer', display: 'block' }}
+                      >删除聊天</button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Panel toggle */}
                 <button
-                  onClick={sendMessage}
-                  disabled={!input.trim()}
-                  style={{ width: 38, height: 38, borderRadius: 10, background: `linear-gradient(180deg, ${T.pinkHi}, ${T.pink})`, border: 'none', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: input.trim() ? 'pointer' : 'default', opacity: input.trim() ? 1 : 0.5, boxShadow: '0 6px 16px rgba(212,83,126,0.35)', flexShrink: 0 }}
+                  onClick={() => setPanelOpen(v => !v)}
+                  type="button"
+                  title={panelOpen ? '收起人物信息' : '展开人物信息'}
+                  style={{ width: 36, height: 36, borderRadius: 8, background: 'transparent', border: `1px solid ${T.border}`, color: T.textMute, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <Icon name="send" size={16} />
+                  <div style={{ transform: panelOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.25s ease', display: 'flex', alignItems: 'center' }}>
+                    <Icon name="arrow" size={14} color={T.textMute} />
+                  </div>
                 </button>
               </div>
             </div>
-          </div>
 
-          {/* Col 4: Character info panel */}
-          <div style={{ width: 280, background: T.panel, borderLeft: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
-            {/* Portrait image — 58% of panel height */}
-            <div style={{ flex: '0 0 58%', position: 'relative', overflow: 'hidden' }}>
-              {active.portraitUrl ? (
-                <img src={active.portraitUrl} alt={active.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
-              ) : (
-                <>
-                  <div style={{ position: 'absolute', inset: 0, background: active.grad }} />
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 120, opacity: 0.18 }}>{active.emoji}</div>
-                </>
-              )}
-              <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 14px)' }} />
-              <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 90, background: `linear-gradient(180deg, transparent, ${T.panel})` }} />
-            </div>
-            {/* Info — name, age, story only */}
-            <div style={{ flex: 1, overflow: 'auto', padding: '20px 22px' }}>
-              <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 22, fontWeight: 600, color: T.text }}>
-                {active.emoji} {active.name}
+            {/* ── Chat + character panel row ── */}
+            <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
+
+              {/* Chat messages + input */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, background: T.bg }}>
+                <div style={{ flex: 1, overflow: 'auto', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+                  <DateSep label="今天" />
+                  {messages.length === 0 && (
+                    <div style={{ textAlign: 'center', color: T.textMute, fontSize: 13, marginTop: 20 }}>和{active.name}说些什么吧~</div>
+                  )}
+                  {messages.map(msg => {
+                    if (msg.role === 'user') return <BubbleUser key={msg.id} text={msg.text} />;
+                    return (
+                      <React.Fragment key={msg.id}>
+                        <BubbleAI c={active} text={msg.text} imageUrl={msg.imageUrl} imgState={msg.imgState} />
+                        {msg.imageUrl && msg.imgState === 'loading' && <ImageLoadingBubble c={active} />}
+                      </React.Fragment>
+                    );
+                  })}
+                  {isTyping && <Typing c={active} />}
+                  <div ref={bottomRef} />
+                </div>
+                <div style={{ padding: '12px 22px 16px', borderTop: `1px solid ${T.border}`, background: T.panel, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, background: T.panel2, border: `1px solid ${T.border}`, borderRadius: 14, padding: '6px 8px' }}>
+                    <textarea
+                      ref={textareaRef}
+                      value={input}
+                      onChange={e => setInput(e.target.value.slice(0, 500))}
+                      onKeyDown={handleKeyDown}
+                      placeholder={`和${active.name}说些什么…`}
+                      rows={1}
+                      style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: T.text, fontSize: 14, fontFamily: 'inherit', resize: 'none', padding: '10px 8px', lineHeight: 1.5, maxHeight: 120, overflowY: 'auto' }}
+                    />
+                    <div style={{ fontSize: 11, color: T.textMute, padding: '0 4px', flexShrink: 0 }}>{input.length}/500</div>
+                    <button
+                      onClick={sendMessage}
+                      disabled={!input.trim()}
+                      style={{ width: 38, height: 38, borderRadius: 10, background: `linear-gradient(180deg, ${T.pinkHi}, ${T.pink})`, border: 'none', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: input.trim() ? 'pointer' : 'default', opacity: input.trim() ? 1 : 0.5, boxShadow: '0 6px 16px rgba(212,83,126,0.35)', flexShrink: 0 }}
+                    >
+                      <Icon name="send" size={16} />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: 13, color: T.textDim, marginTop: 4 }}>{active.age}岁</div>
-              <div style={{ fontSize: 13, color: T.textDim, marginTop: 14, lineHeight: 1.7 }}>{active.story}</div>
+
+              {/* Character info panel — conditional */}
+              {panelOpen && (
+                <div style={{ width: 280, background: T.panel, borderLeft: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
+                  {/* 20px breathing gap before image */}
+                  <div style={{ height: 20, flexShrink: 0 }} />
+                  {/* Portrait image — 56% of panel height */}
+                  <div style={{ flex: '0 0 56%', position: 'relative', overflow: 'hidden' }}>
+                    {active.portraitUrl ? (
+                      <img src={active.portraitUrl} alt={active.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
+                    ) : (
+                      <>
+                        <div style={{ position: 'absolute', inset: 0, background: active.grad }} />
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 120, opacity: 0.18 }}>{active.emoji}</div>
+                      </>
+                    )}
+                    <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 14px)' }} />
+                    <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 80, background: `linear-gradient(180deg, transparent, ${T.panel})` }} />
+                  </div>
+                  {/* Info — name + age inline, story */}
+                  <div style={{ flex: 1, overflow: 'auto', padding: '18px 22px' }}>
+                    <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 20, fontWeight: 600, color: T.text, display: 'flex', alignItems: 'baseline', gap: 0 }}>
+                      {active.name}
+                      <span style={{ fontSize: 14, fontWeight: 400, color: T.textDim, marginLeft: 16 }}>{active.age}岁</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: T.textDim, marginTop: 14, lineHeight: 1.7 }}>{active.story}</div>
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
 

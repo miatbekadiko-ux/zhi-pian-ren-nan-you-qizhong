@@ -9,25 +9,89 @@ import { characters } from '@/lib/characters';
 import { useAuthState } from '@/lib/useAuth';
 import { PremiumModal } from '@/components/PremiumModal';
 
-const CAROUSEL_CSS = `
-  @keyframes pb-in-r  { from { opacity:0; transform:translateX(36px) scale(0.95); } to { opacity:1; transform:none; } }
-  @keyframes pb-in-l  { from { opacity:0; transform:translateX(-36px) scale(0.95); } to { opacity:1; transform:none; } }
-  @keyframes pb-out-l { from { opacity:1; transform:none; } to { opacity:0; transform:translateX(-36px) scale(0.95); } }
-  @keyframes pb-out-r { from { opacity:1; transform:none; } to { opacity:0; transform:translateX(36px) scale(0.95); } }
+const BANNER_CSS = `
+  @keyframes pb-in-r  { from { opacity:0; transform:translateX(48px); } to { opacity:1; transform:none; } }
+  @keyframes pb-in-l  { from { opacity:0; transform:translateX(-48px); } to { opacity:1; transform:none; } }
+  @keyframes pb-out-l { from { opacity:1; transform:none; } to { opacity:0; transform:translateX(-48px); } }
+  @keyframes pb-out-r { from { opacity:1; transform:none; } to { opacity:0; transform:translateX(48px); } }
 `;
 
-function PromoBanner({ onStart, onNavigate }: { onStart: () => void; onNavigate: (id: string) => void }) {
-  const groups = React.useMemo(() => {
-    const r: (typeof characters[number])[][] = [];
-    for (let i = 0; i < characters.length; i += 2) r.push(characters.slice(i, i + 2));
-    return r;
-  }, []);
+type PosterChar = { id: string; portraitUrl?: string; grad: string; emoji: string };
 
+function DualBg({ left, right }: { left: PosterChar; right: PosterChar }) {
+  return (
+    <>
+      <div style={{ position: 'absolute', left: 0, top: 0, width: '52%', height: '100%', overflow: 'hidden' }}>
+        {left.portraitUrl
+          ? <img src={left.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
+          : <div style={{ width: '100%', height: '100%', background: left.grad }} />}
+        <div style={{ position: 'absolute', top: 0, right: 0, width: '42%', height: '100%', background: 'linear-gradient(to right, transparent, rgba(7,5,12,0.92))' }} />
+      </div>
+      <div style={{ position: 'absolute', right: 0, top: 0, width: '52%', height: '100%', overflow: 'hidden' }}>
+        {right.portraitUrl
+          ? <img src={right.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
+          : <div style={{ width: '100%', height: '100%', background: right.grad }} />}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '42%', height: '100%', background: 'linear-gradient(to left, transparent, rgba(7,5,12,0.92))' }} />
+      </div>
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.52) 0%, transparent 52%)' }} />
+    </>
+  );
+}
+
+function Poster1({ left, right, anim, isEnter, onStart }: { left: PosterChar; right: PosterChar; anim: string; isEnter: boolean; onStart: () => void }) {
+  return (
+    <div style={{ position: 'absolute', inset: 0, animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents: isEnter ? 'auto' : 'none', overflow: 'hidden' }}>
+      <DualBg left={left} right={right} />
+      {/* Warm pink atmospheric glow on right */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 78% 38%, rgba(220,90,130,0.14), transparent 58%)' }} />
+      {/* RIGHT-aligned copy — serif, light weight */}
+      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '44%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', padding: '0 52px 0 16px', textAlign: 'right' }}>
+        <div style={{ fontFamily: '"Noto Serif SC", Georgia, "Times New Roman", serif', fontSize: 48, fontWeight: 300, color: '#fff', lineHeight: 1.1, marginBottom: 38, letterSpacing: -0.5, textShadow: '0 2px 28px rgba(0,0,0,0.45)' }}>
+          现在免费体验！
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.68)', fontSize: 12, marginBottom: 24 }}>
+          <span style={{ display: 'flex' }}>{[1, 2, 3, 4].map(i => <span key={i} style={{ color: '#FFD23F' }}>★</span>)}</span>
+          <span>已有 12,840 位用户</span>
+        </div>
+        <button onClick={onStart} style={{ height: 44, padding: '0 30px', background: 'transparent', border: '1.5px solid rgba(255,255,255,0.58)', color: '#fff', borderRadius: 999, fontSize: 14, fontWeight: 300, fontFamily: '"Noto Serif SC", Georgia, serif', cursor: 'pointer', letterSpacing: 2 }}>
+          立即开始
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Poster2({ left, right, anim, isEnter, onNavigate }: { left: PosterChar; right: PosterChar; anim: string; isEnter: boolean; onNavigate: (id: string) => void }) {
+  return (
+    <div style={{ position: 'absolute', inset: 0, animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents: isEnter ? 'auto' : 'none', overflow: 'hidden' }}>
+      <DualBg left={left} right={right} />
+      {/* Cool blue-purple atmospheric tone on left */}
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(18,8,32,0.48) 0%, transparent 52%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 22% 52%, rgba(55,18,95,0.22), transparent 58%)' }} />
+      {/* LEFT-aligned copy — heavy sans-serif */}
+      <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '50%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', padding: '0 36px 0 52px' }}>
+        <div style={{ fontFamily: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif', fontSize: 38, fontWeight: 900, color: '#fff', lineHeight: 1.28, marginBottom: 22, letterSpacing: 0, textShadow: '0 2px 18px rgba(0,0,0,0.55)', maxWidth: 290 }}>
+          你有多久，没被人真正在意过
+        </div>
+        <div style={{ width: 52, height: 2, background: 'rgba(255,255,255,0.42)', marginBottom: 30 }} />
+        <button onClick={() => onNavigate(left.id)} style={{ height: 46, padding: '0 28px', background: '#D4537E', border: 'none', color: '#fff', borderRadius: 999, fontSize: 15, fontWeight: 700, fontFamily: '"Noto Sans SC", sans-serif', cursor: 'pointer', boxShadow: '0 8px 28px rgba(212,83,126,0.5)', letterSpacing: 1 }}>
+          去见见他
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const POSTER_PAIRS = [
+  { leftId: 'lin', rightId: 'pei' },
+  { leftId: 'kai', rightId: 'yan' },
+] as const;
+
+function PromoBanner({ onStart, onNavigate }: { onStart: () => void; onNavigate: (id: string) => void }) {
   const [idx, setIdx] = React.useState(0);
   const [exitIdx, setExitIdx] = React.useState<number | null>(null);
   const [dir, setDir] = React.useState<'r' | 'l'>('r');
   const [animKey, setAnimKey] = React.useState(0);
-  const [hovered, setHovered] = React.useState<string | null>(null);
   const exitTimer = React.useRef<ReturnType<typeof setTimeout>>();
 
   const go = React.useCallback((newIdx: number, newDir: 'r' | 'l') => {
@@ -36,158 +100,55 @@ function PromoBanner({ onStart, onNavigate }: { onStart: () => void; onNavigate:
     setDir(newDir);
     setIdx(newIdx);
     setAnimKey(k => k + 1);
-    exitTimer.current = setTimeout(() => setExitIdx(null), 480);
+    exitTimer.current = setTimeout(() => setExitIdx(null), 560);
   }, [idx]);
 
   React.useEffect(() => {
-    const t = setInterval(() => go(idx === groups.length - 1 ? 0 : idx + 1, 'r'), 5000);
+    const t = setInterval(() => go(idx === POSTER_PAIRS.length - 1 ? 0 : idx + 1, 'r'), 6000);
     return () => clearInterval(t);
-  }, [idx, groups.length, go]);
+  }, [idx, go]);
 
   React.useEffect(() => () => clearTimeout(exitTimer.current), []);
 
-  const prev = () => go(idx === 0 ? groups.length - 1 : idx - 1, 'l');
-  const next = () => go(idx === groups.length - 1 ? 0 : idx + 1, 'r');
+  const prev = () => go(idx === 0 ? POSTER_PAIRS.length - 1 : idx - 1, 'l');
+  const next = () => go(idx === POSTER_PAIRS.length - 1 ? 0 : idx + 1, 'r');
 
   const enterAnim = dir === 'r' ? 'pb-in-r' : 'pb-in-l';
   const exitAnim  = dir === 'r' ? 'pb-out-l' : 'pb-out-r';
 
-  const renderGroup = (groupIdx: number, isEnter: boolean, key: React.Key) => {
-    const group = groups[groupIdx] || [];
-    return (
-      <div
-        key={key}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 12,
-          padding: '14px 30px',
-          pointerEvents: isEnter ? 'auto' : 'none',
-          zIndex: isEnter ? 2 : 1,
-        }}
-      >
-        {group.map((char, cardIdx) => {
-          const isLeft = cardIdx === 0;
-          const delay = `${cardIdx * 80}ms`;
-          const anim = isEnter ? enterAnim : exitAnim;
-          const isHov = hovered === char.id && isEnter;
-
-          const cardTransform = isLeft
-            ? `scale(0.9) translateX(-4px)${isHov ? ' translateY(-6px)' : ''}`
-            : isHov ? 'translateY(-6px)' : 'none';
-
-          return (
-            <div
-              key={char.id}
-              style={{
-                flex: '0 0 108px',
-                height: 162,
-                animation: `${anim} 0.42s cubic-bezier(0.22,1,0.36,1) ${delay} both`,
-              }}
-            >
-              <div
-                onMouseEnter={() => setHovered(char.id)}
-                onMouseLeave={() => setHovered(null)}
-                onClick={() => onNavigate(char.id)}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: 18,
-                  overflow: 'hidden',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  boxShadow: isHov
-                    ? '0 22px 52px rgba(0,0,0,0.65)'
-                    : isLeft
-                      ? '0 8px 22px rgba(0,0,0,0.38)'
-                      : '0 14px 36px rgba(0,0,0,0.52)',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  transformOrigin: isLeft ? 'right center' : 'left center',
-                  transform: cardTransform,
-                  transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-                }}
-              >
-                {char.portraitUrl ? (
-                  <img
-                    src={char.portraitUrl}
-                    alt={char.name}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  />
-                ) : (
-                  <div style={{ width: '100%', height: '100%', background: char.grad }} />
-                )}
-                <div style={{
-                  position: 'absolute', left: 0, right: 0, bottom: 0, height: '48%',
-                  background: 'linear-gradient(180deg, transparent 0%, rgba(170,50,95,0.38) 100%)',
-                  pointerEvents: 'none',
-                }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
+  const renderPoster = (pIdx: number, isEnter: boolean, key: React.Key) => {
+    const pair = POSTER_PAIRS[pIdx];
+    if (!pair) return null;
+    const left  = characters.find(c => c.id === pair.leftId)!;
+    const right = characters.find(c => c.id === pair.rightId)!;
+    const anim  = isEnter ? enterAnim : exitAnim;
+    return pIdx === 0
+      ? <Poster1 key={key} left={left} right={right} anim={anim} isEnter={isEnter} onStart={onStart} />
+      : <Poster2 key={key} left={left} right={right} anim={anim} isEnter={isEnter} onNavigate={onNavigate} />;
   };
 
   return (
     <>
-      <style>{CAROUSEL_CSS}</style>
-      <div style={{ minHeight: 220, height: 220, flex: '0 0 220px', marginTop: 24, boxSizing: 'border-box', position: 'relative', zIndex: 0, overflow: 'hidden', borderRadius: 24, background: 'linear-gradient(115deg, #4A0E78 0%, #8B00FF 30%, #D4537E 70%, #FF1493 100%)' }}>
-        <div style={{ position: 'absolute', top: -110, left: '16%', width: 320, height: 320, borderRadius: '50%', background: '#FF6FB5', filter: 'blur(80px)', opacity: 0.5 }} />
-        <div style={{ position: 'absolute', top: -70, right: '12%', width: 260, height: 260, borderRadius: '50%', background: '#FFD23F', filter: 'blur(90px)', opacity: 0.32 }} />
-        <div style={{ position: 'absolute', bottom: -120, left: '42%', width: 380, height: 380, borderRadius: '50%', background: '#7C3DFF', filter: 'blur(110px)', opacity: 0.42 }} />
-        {[
-          { l: '8%',  t: 50,  s: 10, c: '#FFD23F', o: 0.92 },
-          { l: '12%', t: 190, s: 6,  c: '#fff',    o: 0.65 },
-          { l: '34%', t: 210, s: 12, c: '#FFB6E1', o: 0.9  },
-          { l: '62%', t: 30,  s: 8,  c: '#FFE7A8', o: 0.88 },
-          { l: '74%', t: 190, s: 10, c: '#fff',    o: 0.65 },
-          { l: '88%', t: 110, s: 14, c: '#FFD23F', o: 0.8  },
-          { l: '96%', t: 200, s: 8,  c: '#fff',    o: 0.55 },
-        ].map((b, i) => (
-          <div key={i} style={{ position: 'absolute', left: b.l, top: b.t, width: b.s, height: b.s, borderRadius: '50%', background: b.c, opacity: b.o, boxShadow: `0 0 ${b.s * 1.5}px ${b.c}` }} />
-        ))}
-        {[
-          { l: '10%', t: 110, r: -20, c: '#FFD23F' },
-          { l: '30%', t: 62,  r: 40,  c: '#fff'    },
-          { l: '72%', t: 62,  r: -18, c: '#FFE7A8' },
-          { l: '84%', t: 230, r: 28,  c: '#fff'    },
-        ].map((c, i) => (
-          <div key={i} style={{ position: 'absolute', left: c.l, top: c.t, width: 16, height: 3, background: c.c, borderRadius: 2, transform: `rotate(${c.r}deg)`, opacity: 0.85 }} />
-        ))}
+      <style>{BANNER_CSS}</style>
+      <div style={{ height: 360, marginTop: 24, position: 'relative', overflow: 'hidden', borderRadius: 24, background: '#07050c' }}>
+        {exitIdx !== null && renderPoster(exitIdx, false, `exit-${exitIdx}-${animKey}`)}
+        {renderPoster(idx, true, `enter-${idx}-${animKey}`)}
 
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'stretch' }}>
-          {/* LEFT: portrait carousel */}
-          <div style={{ position: 'relative', width: '46%', height: '100%', overflow: 'hidden' }}>
-            {exitIdx !== null && renderGroup(exitIdx, false, `exit-${exitIdx}-${animKey}`)}
-            {renderGroup(idx, true, `enter-${idx}-${animKey}`)}
-            <button onClick={prev} type="button" style={{ position: 'absolute', left: 6, top: '50%', transform: 'translateY(-50%)', width: 36, height: 36, borderRadius: 999, border: '1px solid rgba(255,255,255,0.24)', background: 'rgba(0,0,0,0.35)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9 }}>
-              <Icon name="arrow" size={16} color="#fff" />
-            </button>
-            <button onClick={next} type="button" style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%) rotate(180deg)', width: 36, height: 36, borderRadius: 999, border: '1px solid rgba(255,255,255,0.24)', background: 'rgba(0,0,0,0.35)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9 }}>
-              <Icon name="arrow" size={16} color="#fff" />
-            </button>
-          </div>
+        {/* Bare arrow — left */}
+        <button onClick={prev} type="button" aria-label="上一张" style={{ position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', zIndex: 10, padding: 8, display: 'flex', alignItems: 'center', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.6))' }}>
+          <Icon name="arrow" size={26} color="rgba(255,255,255,0.82)" />
+        </button>
+        {/* Bare arrow — right */}
+        <button onClick={next} type="button" aria-label="下一张" style={{ position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%) rotate(180deg)', background: 'none', border: 'none', cursor: 'pointer', zIndex: 10, padding: 8, display: 'flex', alignItems: 'center', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.6))' }}>
+          <Icon name="arrow" size={26} color="rgba(255,255,255,0.82)" />
+        </button>
 
-          {/* RIGHT: CTA text */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: 54, position: 'relative', zIndex: 2 }}>
-            <div style={{ fontFamily: '"Noto Sans SC", sans-serif', fontSize: 42, fontWeight: 800, color: '#fff', textShadow: '0 4px 22px rgba(0,0,0,0.35), 0 0 18px rgba(255,255,255,0.25)', lineHeight: 1.05, marginBottom: 30, letterSpacing: -0.5 }}>现在免费体验！</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-              <button onClick={onStart} style={{ height: 40, padding: '0 28px', background: 'linear-gradient(180deg, #fff 0%, #FFE0EC 100%)', color: '#B83466', border: 'none', borderRadius: 999, fontSize: 15, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer', boxShadow: '0 8px 24px rgba(255,255,255,0.35), 0 0 0 4px rgba(255,255,255,0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', letterSpacing: 0.5 }}>
-                立即开始
-              </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#FFE0EC', fontSize: 12 }}>
-                <span style={{ display: 'flex' }}>{[1, 2, 3, 4].map(i => <span key={i} style={{ color: '#FFD23F' }}>★</span>)}</span>
-                <span>已有 12,840 位用户</span>
-              </div>
-            </div>
-          </div>
+        {/* Dot indicators */}
+        <div style={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 8, zIndex: 10 }}>
+          {POSTER_PAIRS.map((_, i) => (
+            <div key={i} onClick={() => go(i, i > idx ? 'r' : 'l')} style={{ width: i === idx ? 22 : 6, height: 6, borderRadius: 3, background: i === idx ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.32)', transition: 'width 0.32s ease', cursor: 'pointer' }} />
+          ))}
         </div>
-
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.12) 50%, transparent 65%)', pointerEvents: 'none' }} />
       </div>
     </>
   );
