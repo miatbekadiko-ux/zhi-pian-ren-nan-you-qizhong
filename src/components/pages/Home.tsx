@@ -18,22 +18,57 @@ const BANNER_CSS = `
 
 type PosterChar = { id: string; portraitUrl?: string; grad: string; emoji: string };
 
-function DualBg({ left, right }: { left: PosterChar; right: PosterChar }) {
+// Both characters occupy the left 2/3; text lives in the right 1/3.
+// The seam between portraits is dissolved with a matching atmospheric color,
+// making the two images read as one continuous scene.
+function SceneBg({ left, right, tone }: { left: PosterChar; right: PosterChar; tone: 'rose' | 'night' }) {
+  const seamColor  = tone === 'rose' ? 'rgba(155,45,115,0.88)'  : 'rgba(8,16,40,0.92)';
+  const baseBg     = tone === 'rose'
+    ? 'linear-gradient(135deg, #1c0832 0%, #3d1050 50%, #150624 100%)'
+    : 'linear-gradient(135deg, #050810 0%, #0e1828 50%, #080c18 100%)';
+  const textAreaBg = tone === 'rose' ? 'rgba(16,4,28,0.97)' : 'rgba(5,8,18,0.97)';
+  const toneGrade  = tone === 'rose'
+    ? 'linear-gradient(135deg, rgba(210,70,140,0.22) 0%, rgba(150,50,200,0.18) 60%, transparent 100%)'
+    : 'linear-gradient(135deg, rgba(15,35,80,0.32) 0%, rgba(25,55,100,0.25) 60%, transparent 100%)';
+
   return (
     <>
-      <div style={{ position: 'absolute', left: 0, top: 0, width: '52%', height: '100%', overflow: 'hidden' }}>
+      {/* Atmospheric base */}
+      <div style={{ position: 'absolute', inset: 0, background: baseBg }} />
+
+      {/* Left character — left ~35% */}
+      <div style={{ position: 'absolute', left: 0, top: 0, width: '35%', height: '100%', overflow: 'hidden' }}>
         {left.portraitUrl
           ? <img src={left.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
           : <div style={{ width: '100%', height: '100%', background: left.grad }} />}
-        <div style={{ position: 'absolute', top: 0, right: 0, width: '42%', height: '100%', background: 'linear-gradient(to right, transparent, rgba(7,5,12,0.92))' }} />
+        {/* Right edge dissolves into seam color — no hard cut */}
+        <div style={{ position: 'absolute', top: 0, right: 0, width: '40%', height: '100%', background: `linear-gradient(to right, transparent, ${seamColor})` }} />
       </div>
-      <div style={{ position: 'absolute', right: 0, top: 0, width: '52%', height: '100%', overflow: 'hidden' }}>
+
+      {/* Right character — 31 % to 67 % (overlaps the seam zone) */}
+      <div style={{ position: 'absolute', left: '31%', top: 0, width: '36%', height: '100%', overflow: 'hidden' }}>
         {right.portraitUrl
           ? <img src={right.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
           : <div style={{ width: '100%', height: '100%', background: right.grad }} />}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '42%', height: '100%', background: 'linear-gradient(to left, transparent, rgba(7,5,12,0.92))' }} />
+        {/* Left edge blends out of the same seam color */}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '28%', height: '100%', background: `linear-gradient(to left, transparent, ${seamColor})` }} />
+        {/* Right edge fades into the text area background */}
+        <div style={{ position: 'absolute', top: 0, right: 0, width: '54%', height: '100%', background: `linear-gradient(to right, transparent, ${textAreaBg})` }} />
       </div>
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.52) 0%, transparent 52%)' }} />
+
+      {/* Unified color-grade overlay on character area */}
+      <div style={{ position: 'absolute', left: 0, top: 0, width: '67%', height: '100%', background: toneGrade }} />
+
+      {/* Subtle city-light glow for night tone */}
+      {tone === 'night' && (
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 25% 50%, rgba(60,120,255,0.07), transparent 52%)' }} />
+      )}
+
+      {/* Solid text-area background (right 1/3) */}
+      <div style={{ position: 'absolute', right: 0, top: 0, width: '35%', height: '100%', background: textAreaBg }} />
+
+      {/* Global bottom vignette */}
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.42) 0%, transparent 52%)' }} />
     </>
   );
 }
@@ -41,15 +76,13 @@ function DualBg({ left, right }: { left: PosterChar; right: PosterChar }) {
 function Poster1({ left, right, anim, isEnter, onStart }: { left: PosterChar; right: PosterChar; anim: string; isEnter: boolean; onStart: () => void }) {
   return (
     <div style={{ position: 'absolute', inset: 0, animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents: isEnter ? 'auto' : 'none', overflow: 'hidden' }}>
-      <DualBg left={left} right={right} />
-      {/* Warm pink atmospheric glow on right */}
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 78% 38%, rgba(220,90,130,0.14), transparent 58%)' }} />
-      {/* RIGHT-aligned copy — serif, light weight */}
-      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '44%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', padding: '0 52px 0 16px', textAlign: 'right' }}>
-        <div style={{ fontFamily: '"Noto Serif SC", Georgia, "Times New Roman", serif', fontSize: 48, fontWeight: 300, color: '#fff', lineHeight: 1.1, marginBottom: 38, letterSpacing: -0.5, textShadow: '0 2px 28px rgba(0,0,0,0.45)' }}>
+      <SceneBg left={left} right={right} tone="rose" />
+      {/* RIGHT 1/3 — serif light, right-aligned */}
+      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '36%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', padding: '0 48px 0 16px', textAlign: 'right', zIndex: 5 }}>
+        <div style={{ fontFamily: '"Noto Serif SC", Georgia, "Times New Roman", serif', fontSize: 44, fontWeight: 300, color: '#fff', lineHeight: 1.1, marginBottom: 34, letterSpacing: -0.5, textShadow: '0 2px 28px rgba(0,0,0,0.45)' }}>
           现在免费体验！
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.68)', fontSize: 12, marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.68)', fontSize: 12, marginBottom: 24, justifyContent: 'flex-end' }}>
           <span style={{ display: 'flex' }}>{[1, 2, 3, 4].map(i => <span key={i} style={{ color: '#FFD23F' }}>★</span>)}</span>
           <span>已有 12,840 位用户</span>
         </div>
@@ -64,16 +97,13 @@ function Poster1({ left, right, anim, isEnter, onStart }: { left: PosterChar; ri
 function Poster2({ left, right, anim, isEnter, onNavigate }: { left: PosterChar; right: PosterChar; anim: string; isEnter: boolean; onNavigate: (id: string) => void }) {
   return (
     <div style={{ position: 'absolute', inset: 0, animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents: isEnter ? 'auto' : 'none', overflow: 'hidden' }}>
-      <DualBg left={left} right={right} />
-      {/* Cool blue-purple atmospheric tone on left */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(18,8,32,0.48) 0%, transparent 52%)' }} />
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 22% 52%, rgba(55,18,95,0.22), transparent 58%)' }} />
-      {/* LEFT-aligned copy — heavy sans-serif */}
-      <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '50%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', padding: '0 36px 0 52px' }}>
-        <div style={{ fontFamily: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif', fontSize: 38, fontWeight: 900, color: '#fff', lineHeight: 1.28, marginBottom: 22, letterSpacing: 0, textShadow: '0 2px 18px rgba(0,0,0,0.55)', maxWidth: 290 }}>
+      <SceneBg left={left} right={right} tone="night" />
+      {/* RIGHT 1/3 — heavy sans-serif, left-aligned within text panel */}
+      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '36%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', padding: '0 32px 0 30px', zIndex: 5 }}>
+        <div style={{ fontFamily: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif', fontSize: 34, fontWeight: 900, color: '#fff', lineHeight: 1.28, marginBottom: 22, letterSpacing: 0, textShadow: '0 2px 18px rgba(0,0,0,0.55)', maxWidth: 265 }}>
           你有多久，没被人真正在意过
         </div>
-        <div style={{ width: 52, height: 2, background: 'rgba(255,255,255,0.42)', marginBottom: 30 }} />
+        <div style={{ width: 48, height: 2, background: 'rgba(255,255,255,0.42)', marginBottom: 28 }} />
         <button onClick={() => onNavigate(left.id)} style={{ height: 46, padding: '0 28px', background: '#D4537E', border: 'none', color: '#fff', borderRadius: 999, fontSize: 15, fontWeight: 700, fontFamily: '"Noto Sans SC", sans-serif', cursor: 'pointer', boxShadow: '0 8px 28px rgba(212,83,126,0.5)', letterSpacing: 1 }}>
           去见见他
         </button>
