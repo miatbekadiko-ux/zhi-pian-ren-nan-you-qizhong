@@ -24,6 +24,13 @@ type ImgState = 'pending' | 'loading' | 'done';
 type Msg = { id: number; role: 'user' | 'ai'; text: string; imageUrl?: string | null; imgState?: ImgState };
 
 function Avatar({ c, size = 36 }: { c: Character; size?: number }) {
+  if (c.portraitUrl) {
+    return (
+      <div style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `1px solid ${T.border}` }}>
+        <img src={c.portraitUrl} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
+      </div>
+    );
+  }
   return (
     <div style={{ width: size, height: size, borderRadius: '50%', background: c.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.5, flexShrink: 0, border: `1px solid ${T.border}` }}>{c.emoji}</div>
   );
@@ -344,17 +351,20 @@ export function PageChat() {
     setMessages([]);
   }, []);
 
-  // Sort conversations by most recent interaction
-  const conversations = characters.map(c => {
-    const preview = convoPreviews[c.id];
-    return {
-      c,
-      last: preview?.lastMessagePreview ?? '还没有消息，快来打招呼吧~',
-      time: preview?.updatedAt ? formatMsgTime(preview.updatedAt) : '',
-      updatedAt: preview?.updatedAt ?? '1970-01-01T00:00:00Z',
-      active: c.id === activeId,
-    };
-  }).sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  // Only show characters the user has actually chatted with, sorted by most recent
+  const conversations = characters
+    .filter(c => !!convoPreviews[c.id])
+    .map(c => {
+      const preview = convoPreviews[c.id]!;
+      return {
+        c,
+        last: preview.lastMessagePreview ?? '',
+        time: formatMsgTime(preview.updatedAt),
+        updatedAt: preview.updatedAt,
+        active: c.id === activeId,
+      };
+    })
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
   return (
     <>
@@ -393,14 +403,16 @@ export function PageChat() {
         {/* ── Content row below navbar ── */}
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
 
-          {/* Col 1: Collapsed icon sidebar */}
-          <Sidebar active="chat" collapsed onVipClick={() => setPremiumOpen(true)} />
+          {/* Col 1: Sidebar — same full style as home page */}
+          <Sidebar active="chat" onVipClick={() => setPremiumOpen(true)} />
 
           {/* Col 2: Conversation list */}
           <div style={{ width: 260, background: T.panel, borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
             <div style={{ padding: '20px 18px 14px', flexShrink: 0 }}>
               <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 20, fontWeight: 600 }}>聊天</div>
-              <div style={{ fontSize: 11, color: T.textMute, marginTop: 2, letterSpacing: 1 }}>{characters.length} 位男友 · 同时只能与一位</div>
+              <div style={{ fontSize: 11, color: T.textMute, marginTop: 2, letterSpacing: 1 }}>
+                {conversations.length > 0 ? `${conversations.length} 条对话记录` : '去首页选一位男友开始聊天吧'}
+              </div>
             </div>
             <div style={{ padding: '0 12px 12px', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: T.panel3, border: `1px solid ${T.border}`, borderRadius: 8, fontSize: 12, color: T.textMute }}>
@@ -419,15 +431,9 @@ export function PageChat() {
 
             {/* ── Shared character header spanning chat + info panel ── */}
             <div style={{ height: 58, padding: '0 16px 0 22px', display: 'flex', alignItems: 'center', borderBottom: `1px solid ${T.border}`, background: T.panel, flexShrink: 0, gap: 12 }}>
-              <Avatar c={active} size={34} />
+              <Avatar c={active} size={38} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15, fontWeight: 500, color: T.text, display: 'flex', alignItems: 'baseline', gap: 0 }}>
-                  {active.name}
-                  <span style={{ fontSize: 13, fontWeight: 400, color: T.textDim, marginLeft: 14 }}>{active.age}岁</span>
-                </div>
-                <div style={{ fontSize: 11, color: active.accent, display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
-                  <span style={{ width: 6, height: 6, background: active.accent, borderRadius: '50%', display: 'inline-block' }} />在线
-                </div>
+                <div style={{ fontSize: 24, fontWeight: 600, color: T.text, lineHeight: 1.15 }}>{active.name}</div>
               </div>
 
               {/* Right action buttons */}
