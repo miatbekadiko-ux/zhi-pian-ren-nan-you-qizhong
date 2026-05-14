@@ -41,51 +41,37 @@ const DRY_RUN  = process.argv.includes('--dry-run');
 // 若 API 报错，可改为 '2560x1440'（16:9）或 '3072x1312'（约 21:9）
 const IMAGE_SIZE = '3024x1296';
 
-// ── 角色外貌核心描述（复用自 scripts/generate-portraits.ts，去掉服装/背景描述）─
-const CHAR_BASE = {
-  lin: `欧美白人男性，看起来大约20多岁，整体形象青春、阳光且富有艺术气息。一头蓬松的棕红色卷发，发型自然随性，充满活力。面部线条清秀，皮肤状态良好，五官立体，眼神清澈而略带忧郁的文艺感。身形偏瘦且修长，整体气质介于青涩与成熟之间。`,
-
-  pei: `欧美白人男性，看起来只有22岁，整体形象年轻、强势且散发出一种上流社会的精英气质。深黑色短发，发型向后梳理得十分整洁，轮廓硬朗。面部干净无胡须，皮肤光滑。眼神深邃而锐利，透露出一种年轻有为的自信与从容。身形壮硕，肌肉感明显，整体体型显得十分有力量感。`,
-
-  kai: `欧美白人男性，28岁，整体形象干练且高冷，短黑发，发型整洁有型，眼神犀利。面部轮廓分明，皮肤光洁，五官立体。身材匀称，肩背挺拔。`,
-
-  yan: `欧美白人男性，31岁，整体形象神秘感十足，深色中长发微卷，眼神深沉且带温柔。面部轮廓精致，皮肤光滑。`,
-};
-
 // ── Banner 专用 Prompt（角色外貌 + 场景叠加层）──────────────────────────────
 const BANNER_CONFIGS: Array<{ file: string; label: string; prompt: string }> = [
   {
     file: 'banner-1.png',
-    label: '林夏 + 凌凯 · 粉紫节日海报',
+    label: '林夏 + 凌凯',
     prompt: [
-      `超宽横幅真实人物摄影商业海报，绝对写实摄影风格，非动漫非插画，真实男性人脸真实皮肤质感。`,
-      `两位帅气欧美白人男性并排站立，面部到腰部特写构图，男性气质强烈，轮廓硬朗，皮肤有真实质感不过度磨皮。`,
+      `Wide cinematic commercial poster, two real handsome Caucasian Western male models, photorealistic photography, real human skin with visible pores, strong masculine facial features, NOT Asian, NOT K-pop, NOT anime, NOT CG.`,
       ``,
-      `左侧男性（凌凯）：${CHAR_BASE.kai}身穿粉白色礼服西装，系粉色领结，表情冷峻自信，面部棱角分明。`,
-      `右侧男性（林夏）：${CHAR_BASE.lin}身穿白色礼服西装，系粉色蝴蝶结，表情阳光自然，面部有真实皮肤纹理。`,
+      `Left male: dark short neat hair, 28 years old, sharp cold eyes, strong jawline, wearing pink-white tuxedo with pink bow tie, confident expression.`,
+      `Right male: curly auburn red hair, 20s, fresh youthful face, clear eyes, wearing white tuxedo with pink bow tie, natural sunny expression.`,
       ``,
-      `场景：梦幻粉紫色渐变背景，背景中散落闪亮光点和彩色气泡装饰，整体氛围浪漫节日感。`,
-      `色调：粉色×紫色×白色，高饱和梦幻粉紫，背景明亮通透。`,
+      `Background: dreamy pink purple gradient, sparkling bokeh lights, floating soap bubbles, romantic festive atmosphere.`,
       ``,
-      `构图要求：两人占据画面左侧约60%区域，右侧40%背景干净简洁无人物，用于叠加文字。`,
-      `photorealistic, RAW photo, real human faces, masculine features, strong jawline, natural skin texture, no beauty filter, no skin smoothing, professional photography, hyperrealistic, 8K, ultra detailed, NOT anime, NOT illustration, NOT cartoon.`,
-      `无任何文字、Logo、水印。`,
+      `Composition: IMPORTANT - both males stand on the LEFT side occupying left 55% of frame, right 45% must be completely empty clean background with no people for text overlay.`,
+      `Style: professional fashion photography, editorial magazine, Canon 5D, 85mm lens, natural skin texture, visible pores, masculine features, strong jawline, hyperrealistic, 8K, NOT anime, NOT illustration.`,
+      `No text, no logo, no watermark.`,
     ].join('\n'),
   },
   {
     file: 'banner-2.png',
-    label: '裴司寒 + 言澈 · 粉紫节日海报',
+    label: '裴司寒 + 言澈',
     prompt: [
-      `Wide cinematic movie poster, two real handsome Caucasian male models standing together, photorealistic photography, real human skin, real faces, NOT anime, NOT CG, NOT illustration.`,
+      `Wide cinematic commercial poster, two real handsome Caucasian Western male models, photorealistic photography, real human skin, strong masculine features, NOT Asian, NOT anime, NOT CG, NOT illustration.`,
       ``,
-      `Left male (background, slightly behind): dark medium-length wavy hair, 31 years old, mysterious deep eyes, wearing black tuxedo with black bow tie, slightly turned sideways.`,
-      `Right male (foreground, main subject, larger): black short hair slicked back, 22 years old, sharp strong jawline, muscular build, wearing white tuxedo with pink bow tie, looking directly at camera, cold confident expression.`,
+      `Left male (background, smaller): dark medium wavy hair, 31 years old, mysterious deep eyes, wearing black tuxedo with black bow tie, slightly turned sideways, standing behind.`,
+      `Right male (foreground, main, larger and closer): black short slicked-back hair, 22 years old, sharp strong jawline, muscular build, wearing white tuxedo with pink bow tie, looking directly at camera, cold confident expression.`,
       ``,
-      `Background: dreamy pink purple gradient, sparkling light bokeh, floating bubbles, romantic festive atmosphere.`,
-      `Color: pink, purple, white, bright and vibrant.`,
+      `Background: dreamy pink purple gradient, sparkling bokeh lights, floating soap bubbles, romantic festive atmosphere.`,
       ``,
-      `Composition: two males occupy left 60% of frame, right 40% is clean empty background for text overlay.`,
-      `Style: professional fashion photography, editorial magazine shoot, Canon 5D, 85mm lens, shallow depth of field, natural skin texture, visible pores, real human faces, hyperrealistic, 8K.`,
+      `Composition: IMPORTANT - both males positioned on the LEFT side occupying left 55% of frame, right 45% must be completely empty clean background with no people for text overlay.`,
+      `Style: professional fashion photography, editorial magazine, Canon 5D, 85mm lens, natural skin texture, masculine features, hyperrealistic, 8K, NOT anime, NOT illustration.`,
       `No text, no logo, no watermark.`,
     ].join('\n'),
   },

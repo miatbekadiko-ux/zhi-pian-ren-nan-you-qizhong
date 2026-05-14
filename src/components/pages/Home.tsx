@@ -44,113 +44,35 @@ function Poster({ ids, anim, isEnter, posterIndex, onStart, onNavigate }: Poster
   );
 
   if (posterIndex === 0) {
-    const lin = characters.find(c => c.id === ids[0]);
-    const kai = characters.find(c => c.id === ids[1]);
-
     return (
       <div style={{ position: 'absolute', inset: 0, animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents: isEnter ? 'auto' : 'none', overflow: 'hidden', display: 'flex' }}>
-        {/* Base */}
-        <div style={{ position: 'absolute', inset: 0, background: '#06000e' }} />
-        {/* Neon atmosphere */}
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 8% 50%, rgba(212,83,126,0.5) 0%, transparent 45%), radial-gradient(ellipse at 38% 60%, rgba(139,0,255,0.35) 0%, transparent 45%)' }} />
-
-        {/* Characters — left 62% */}
-        <div style={{ position: 'absolute', left: 0, top: 0, width: '62%', height: '100%' }}>
-          {/* Kai — back layer */}
-          <div style={{ position: 'absolute', left: 0, top: 0, width: '48%', height: '100%' }}>
-            {kai?.portraitUrl
-              ? <img src={kai.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
-              : <div style={{ width: '100%', height: '100%', background: kai?.grad }} />}
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #06000e 0%, transparent 30%, transparent 60%, #06000e 100%)' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 55%, #06000e 100%)' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)' }} />
-          </div>
-
-          {/* Lin — front layer */}
-          <div style={{ position: 'absolute', left: '15%', top: 0, width: '60%', height: '100%' }}>
-            {lin?.portraitUrl
-              ? <img src={lin.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
-              : <div style={{ width: '100%', height: '100%', background: lin?.grad }} />}
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 50%, #06000e 100%)' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 55%, #06000e 100%)' }} />
-          </div>
-        </div>
-
-        {/* Text area — right 38% */}
-        <div style={{ position: 'absolute', right: 0, top: 0, width: '38%', height: '100%', background: '#06000e', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 28px', zIndex: 5 }}>
+        <img src="/banners/banner-1.png" alt="" style={{ position: 'absolute', left: 0, top: 0, width: '65%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }} />
+        <div style={{ position: 'absolute', left: '40%', top: 0, width: '25%', height: '100%', background: 'linear-gradient(to right, transparent, #1a0a1a)' }} />
+        <div style={{ position: 'absolute', right: 0, top: 0, width: '38%', height: '100%', background: '#1a0a1a', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 28px', zIndex: 5 }}>
           <StarRow />
-          <div style={{ fontFamily: '"Noto Sans SC", "PingFang SC", sans-serif', fontSize: 32, fontWeight: 900, color: '#fff', lineHeight: 1.15, marginBottom: 10, textShadow: '0 0 20px rgba(212,83,126,0.9), 0 0 50px rgba(212,83,126,0.5)' }}>
+          <div style={{ fontFamily: '"Noto Sans SC", sans-serif', fontSize: 32, fontWeight: 900, color: '#fff', lineHeight: 1.15, marginBottom: 10, textShadow: '0 0 20px rgba(212,83,126,0.9), 0 0 50px rgba(212,83,126,0.5)' }}>
             现在<br />免费体验！
           </div>
           <div style={{ width: 32, height: 2, background: 'rgba(212,83,126,0.9)', marginBottom: 12, boxShadow: '0 0 8px rgba(212,83,126,0.6)' }} />
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 18, lineHeight: 1.5 }}>
-            立即加入，开始你的专属故事
-          </div>
-          <button onClick={onStart} style={{ height: 34, padding: '0 20px', background: 'linear-gradient(135deg, #E96A92, #D4537E)', color: 'white', borderRadius: 999, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(212,83,126,0.5)', alignSelf: 'flex-start' }}>
-            立即开始
-          </button>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 18, lineHeight: 1.5 }}>立即加入，开始你的专属故事</div>
+          <button onClick={onStart} style={{ height: 34, padding: '0 20px', background: 'linear-gradient(135deg, #E96A92, #D4537E)', color: 'white', borderRadius: 999, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(212,83,126,0.5)', alignSelf: 'flex-start' }}>立即开始</button>
         </div>
       </div>
     );
   }
 
-  // posterIndex === 1: cao(gao) + pei + yan
-  const yan = characters.find(c => c.id === ids[2]);
-  const pei = characters.find(c => c.id === ids[1]);
-  const gao = characters.find(c => c.id === ids[0]);
-
   return (
     <div style={{ position: 'absolute', inset: 0, animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents: isEnter ? 'auto' : 'none', overflow: 'hidden', display: 'flex' }}>
-      {/* Base */}
-      <div style={{ position: 'absolute', inset: 0, background: '#000412' }} />
-      {/* Neon atmosphere */}
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 10% 45%, rgba(0,110,255,0.45) 0%, transparent 42%), radial-gradient(ellipse at 40% 55%, rgba(80,0,255,0.3) 0%, transparent 40%)' }} />
-
-      {/* Characters — left 62% */}
-      <div style={{ position: 'absolute', left: 0, top: 0, width: '62%', height: '100%' }}>
-        {/* Yan — far left back */}
-        <div style={{ position: 'absolute', left: 0, top: 0, width: '32%', height: '100%' }}>
-          {yan?.portraitUrl
-            ? <img src={yan.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
-            : <div style={{ width: '100%', height: '100%', background: yan?.grad }} />}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #000412 0%, transparent 30%, transparent 60%, #000412 100%)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 55%, #000412 100%)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
-        </div>
-
-        {/* Cao — far right back */}
-        <div style={{ position: 'absolute', right: 0, top: 0, width: '32%', height: '100%' }}>
-          {gao?.portraitUrl
-            ? <img src={gao.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
-            : <div style={{ width: '100%', height: '100%', background: gao?.grad }} />}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, #000412 0%, transparent 30%, transparent 60%, #000412 100%)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 55%, #000412 100%)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
-        </div>
-
-        {/* Pei — center front */}
-        <div style={{ position: 'absolute', left: '14%', top: 0, width: '52%', height: '100%' }}>
-          {pei?.portraitUrl
-            ? <img src={pei.portraitUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
-            : <div style={{ width: '100%', height: '100%', background: pei?.grad }} />}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 55%, #000412 100%)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 55%, #000412 100%)' }} />
-        </div>
-      </div>
-
-      {/* Text area — right 38% */}
-      <div style={{ position: 'absolute', right: 0, top: 0, width: '38%', height: '100%', background: '#000412', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 28px', zIndex: 5 }}>
+      <img src="/banners/banner-2.png" alt="" style={{ position: 'absolute', left: 0, top: 0, width: '65%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }} />
+      <div style={{ position: 'absolute', left: '40%', top: 0, width: '25%', height: '100%', background: 'linear-gradient(to right, transparent, #0a0a1a)' }} />
+      <div style={{ position: 'absolute', right: 0, top: 0, width: '38%', height: '100%', background: '#0a0a1a', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 28px', zIndex: 5 }}>
         <StarRow />
-        <div style={{ fontFamily: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif', fontSize: 30, fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: 10, textShadow: '0 0 20px rgba(0,160,255,0.95), 0 0 50px rgba(0,100,255,0.55)' }}>
+        <div style={{ fontFamily: '"Noto Sans SC", sans-serif', fontSize: 30, fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: 10, textShadow: '0 0 20px rgba(0,160,255,0.95), 0 0 50px rgba(0,100,255,0.55)' }}>
           你有多久，<br />没被在意过
         </div>
         <div style={{ width: 32, height: 2, background: 'rgba(0,200,255,0.9)', marginBottom: 12, boxShadow: '0 0 8px rgba(0,200,255,0.6)' }} />
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 18, lineHeight: 1.5 }}>
-          他们一直在等你
-        </div>
-        <button onClick={() => onNavigate(ids[1])} style={{ height: 34, padding: '0 20px', background: 'linear-gradient(135deg, #D4537E, #FF1580)', color: 'white', borderRadius: 999, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(212,83,126,0.5)', alignSelf: 'flex-start' }}>
-          去见见他们
-        </button>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 18, lineHeight: 1.5 }}>他们一直在等你</div>
+        <button onClick={() => onNavigate(ids[1])} style={{ height: 34, padding: '0 20px', background: 'linear-gradient(135deg, #D4537E, #FF1580)', color: 'white', borderRadius: 999, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(212,83,126,0.5)', alignSelf: 'flex-start' }}>去见见他们</button>
       </div>
     </div>
   );
