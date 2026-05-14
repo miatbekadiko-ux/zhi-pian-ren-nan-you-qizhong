@@ -32,47 +32,187 @@ type PosterProps = {
 };
 
 function Poster({ ids, anim, isEnter, posterIndex, onStart, onNavigate }: PosterProps) {
+
   const StarRow = () => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 12 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 10 }}>
       <span style={{ display: 'flex' }}>
         {[1, 2, 3, 4].map(i => (
-          <span key={i} style={{ color: '#FFD23F', textShadow: '0 0 6px rgba(255,210,63,0.7)' }}>★</span>
+          <span key={i} style={{ color: '#FFD23F', textShadow: '0 0 6px rgba(255,210,63,0.7)', fontSize: 14 }}>★</span>
         ))}
       </span>
       <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>已有 12,840 位用户</span>
     </div>
   );
 
-  if (posterIndex === 0) {
+  const isFirst = posterIndex === 0;
+
+  // ─────────────────────────────────────────────────────────────
+  // 第一张：折扣主打，复刻竞品"SALE 70% OFF / NAUGHTY EASTER"结构
+  // 第二张：情感主打，保留 StarRow + 文案层级
+  // ─────────────────────────────────────────────────────────────
+  if (isFirst) {
     return (
-      <div style={{ position: 'absolute', inset: 0, animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents: isEnter ? 'auto' : 'none', overflow: 'hidden', display: 'flex' }}>
-        <img src="/banners/banner-1.png" alt="" style={{ position: 'absolute', left: 0, top: 0, width: '65%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }} />
-        <div style={{ position: 'absolute', left: '40%', top: 0, width: '25%', height: '100%', background: 'linear-gradient(to right, transparent, #1a0a1a)' }} />
-        <div style={{ position: 'absolute', right: 0, top: 0, width: '38%', height: '100%', background: '#1a0a1a', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 28px', zIndex: 5 }}>
-          <StarRow />
-          <div style={{ fontFamily: '"Noto Sans SC", sans-serif', fontSize: 32, fontWeight: 900, color: '#fff', lineHeight: 1.15, marginBottom: 10, textShadow: '0 0 20px rgba(212,83,126,0.9), 0 0 50px rgba(212,83,126,0.5)' }}>
-            现在<br />免费体验！
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`,
+          pointerEvents: isEnter ? 'auto' : 'none',
+          overflow: 'hidden',
+        }}
+      >
+        {/* 背景图 */}
+        <img
+          src="/banners/banner-1.png"
+          alt=""
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'left top' }}
+        />
+
+        {/* 右侧文字区 */}
+        <div
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            width: '38%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            padding: '0 32px 0 16px',
+            zIndex: 5,
+          }}
+        >
+          {/* 顶部小字：限时特惠，黄色，对齐竞品"SALE 70% OFF" */}
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: '#FFD23F',
+              letterSpacing: 1.5,
+              marginBottom: 8,
+              textShadow: '0 0 10px rgba(255,210,63,0.8)',
+              textTransform: 'uppercase',
+            }}
+          >
+            限时特惠
           </div>
-          <div style={{ width: 32, height: 2, background: 'rgba(212,83,126,0.9)', marginBottom: 12, boxShadow: '0 0 8px rgba(212,83,126,0.6)' }} />
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 18, lineHeight: 1.5 }}>立即加入，开始你的专属故事</div>
-          <button onClick={onStart} style={{ height: 34, padding: '0 20px', background: 'linear-gradient(135deg, #E96A92, #D4537E)', color: 'white', borderRadius: 999, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(212,83,126,0.5)', alignSelf: 'flex-start' }}>立即开始</button>
+
+          {/* 主标题：超大两行，白色粗体，对齐竞品"NAUGHTY EASTER" */}
+          <div
+            style={{
+              fontFamily: '"Noto Sans SC", sans-serif',
+              fontSize: 48,
+              fontWeight: 900,
+              color: '#fff',
+              lineHeight: 1.05,
+              marginBottom: 16,
+              textShadow: '0 0 30px rgba(212,83,126,0.9), 0 0 60px rgba(212,83,126,0.4), 2px 2px 0 rgba(0,0,0,0.5)',
+              letterSpacing: -1,
+            }}
+          >
+            会员
+            <br />
+            7折优惠
+          </div>
+
+          {/* 方形按钮，对齐竞品"SUBSCRIBE"蓝底白字方形 */}
+          <button
+            onClick={onStart}
+            style={{
+              height: 42,
+              padding: '0 28px',
+              background: 'linear-gradient(135deg, #E96A92, #D4537E)',
+              color: 'white',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 700,
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 4px 20px rgba(212,83,126,0.6)',
+              alignSelf: 'flex-start',
+              letterSpacing: 0.5,
+            }}
+          >
+            立即订阅
+          </button>
         </div>
       </div>
     );
   }
 
+  // 第二张：情感主打
   return (
-    <div style={{ position: 'absolute', inset: 0, animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents: isEnter ? 'auto' : 'none', overflow: 'hidden', display: 'flex' }}>
-      <img src="/banners/banner-2.png" alt="" style={{ position: 'absolute', left: 0, top: 0, width: '65%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }} />
-      <div style={{ position: 'absolute', left: '40%', top: 0, width: '25%', height: '100%', background: 'linear-gradient(to right, transparent, #0a0a1a)' }} />
-      <div style={{ position: 'absolute', right: 0, top: 0, width: '38%', height: '100%', background: '#0a0a1a', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 28px', zIndex: 5 }}>
-        <StarRow />
-        <div style={{ fontFamily: '"Noto Sans SC", sans-serif', fontSize: 30, fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: 10, textShadow: '0 0 20px rgba(0,160,255,0.95), 0 0 50px rgba(0,100,255,0.55)' }}>
-          你有多久，<br />没被在意过
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        animation: `${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`,
+        pointerEvents: isEnter ? 'auto' : 'none',
+        overflow: 'hidden',
+      }}
+    >
+      <img
+        src="/banners/banner-2.png"
+        alt=""
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'left top' }}
+      />
+
+      <div
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          width: '50%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center',
+          padding: '0 32px',
+          zIndex: 5,
+        }}
+      >
+        <div style={{ fontSize: 15, fontWeight: 800, color: '#F9A8D4', letterSpacing: 2, marginBottom: 8, textShadow: '0 0 14px rgba(249,168,212,1)' }}>
+          遇见懂你的人
         </div>
-        <div style={{ width: 32, height: 2, background: 'rgba(0,200,255,0.9)', marginBottom: 12, boxShadow: '0 0 8px rgba(0,200,255,0.6)' }} />
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 18, lineHeight: 1.5 }}>他们一直在等你</div>
-        <button onClick={() => onNavigate(ids[1])} style={{ height: 34, padding: '0 20px', background: 'linear-gradient(135deg, #D4537E, #FF1580)', color: 'white', borderRadius: 999, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(212,83,126,0.5)', alignSelf: 'flex-start' }}>去见见他们</button>
+        <div
+          style={{
+            fontFamily: '"Noto Sans SC", sans-serif',
+            fontSize: 58,
+            fontWeight: 900,
+            color: '#fff',
+            lineHeight: 1.05,
+            marginBottom: 24,
+            textShadow: '0 0 30px rgba(129,140,248,0.9), 0 0 60px rgba(236,72,153,0.4), 2px 2px 0 rgba(0,0,0,0.5)',
+            letterSpacing: -1,
+            whiteSpace: 'pre-line',
+          }}
+        >
+          {'你有多久\n没被在意过'}
+        </div>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', marginBottom: 0, lineHeight: 1.5 }}>
+</div>
+        <button
+          onClick={() => onNavigate(ids[1])}
+          style={{
+            height: 46,
+            padding: '0 40px',
+            background: 'linear-gradient(135deg, #C026D3, #DB2777)',
+            color: 'white',
+            borderRadius: 8,
+            fontSize: 14,
+            fontWeight: 700,
+            border: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 4px 20px rgba(129,140,248,0.5)',
+            alignSelf: 'auto',
+            letterSpacing: 0.5,
+          }}
+        >
+          去遇见他
+        </button>
       </div>
     </div>
   );
@@ -117,7 +257,7 @@ function PromoBanner({ onStart, onNavigate }: { onStart: () => void; onNavigate:
   return (
     <>
       <style>{BANNER_CSS}</style>
-      <div style={{ height: 220, marginTop: 24, position: 'relative', overflow: 'hidden', borderRadius: 24, background: '#06000e' }}>
+      <div style={{ height: 280, position: 'relative', overflow: 'hidden', background: '#06000e', maxWidth: '100%', borderRadius: 16 }}>
         {exitIdx !== null && renderPoster(exitIdx, false, `exit-${exitIdx}-${animKey}`)}
         {renderPoster(idx, true, `enter-${idx}-${animKey}`)}
 
@@ -212,7 +352,7 @@ export function PageHome() {
       <div style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
         <Sidebar active="home" onVipClick={() => setPremiumOpen(true)} />
         <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
-          <div style={{ padding: '0 44px' }}>
+          <div style={{ padding: '20px 24px 0 24px' }}>
             <PromoBanner onStart={() => router.push(navTarget)} onNavigate={handleChat} />
           </div>
           <div style={{ flex: 1, padding: '32px 44px' }}>

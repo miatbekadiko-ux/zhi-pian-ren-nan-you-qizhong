@@ -1,20 +1,17 @@
 /**
  * 生成首页 Banner 所需的两张海报背景图片
  *
- * banner-1.png — 林夏 + 裴司寒，暖粉霓虹（夜店/高级酒吧场景）
- * banner-2.png — 凌凯 + 言澈，冷蓝霓虹（赛博朋克雨夜/录音棚场景）
+ * banner-1.png — 林夏 + 裴司寒 + 沈意，深紫霓虹舞台光（复刻竞品风格）
+ * banner-2.png — 顾知予 + 周翌 + 言澈，粉紫温柔玫瑰氛围，三层景深
  *
  * 用法：
  *   npx tsx scripts/generate-banner-images.ts             # 生成图片
  *   npx tsx scripts/generate-banner-images.ts --dry-run   # 仅打印最终 prompt，不调用 API
- *
- * npm 脚本（package.json 中已添加）：
- *   pnpm generate:banners
- *   pnpm generate:banners:preview
  */
 
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 
 // ── 加载 .env.local ────────────────────────────────────────────────────────
 const envPath = path.join(process.cwd(), '.env.local');
@@ -37,49 +34,77 @@ const MODEL    = process.env.IMAGE_MODEL     || 'doubao-seedream-5-0-260128';
 const OUTPUT_DIR = path.join(process.cwd(), 'public', 'banners');
 const DRY_RUN  = process.argv.includes('--dry-run');
 
-// Banner 图片尺寸（21:9，3,919,104 像素，超过 API 最低要求 3,686,400 像素）
-// 若 API 报错，可改为 '2560x1440'（16:9）或 '3072x1312'（约 21:9）
-const IMAGE_SIZE = '3024x1296';
+const IMAGE_SIZE = '4096x1024';
 
-// ── Banner 专用 Prompt（角色外貌 + 场景叠加层）──────────────────────────────
-const BANNER_CONFIGS: Array<{ file: string; label: string; prompt: string }> = [
-  {
-    file: 'banner-1.png',
-    label: '林夏 + 凌凯',
-    prompt: [
-      `Wide cinematic commercial poster, two real handsome Caucasian Western male models, photorealistic photography, real human skin with visible pores, strong masculine facial features, NOT Asian, NOT K-pop, NOT anime, NOT CG.`,
-      ``,
-      `Left male: dark short neat hair, 28 years old, sharp cold eyes, strong jawline, wearing pink-white tuxedo with pink bow tie, confident expression.`,
-      `Right male: curly auburn red hair, 20s, fresh youthful face, clear eyes, wearing white tuxedo with pink bow tie, natural sunny expression.`,
-      ``,
-      `Background: dreamy pink purple gradient, sparkling bokeh lights, floating soap bubbles, romantic festive atmosphere.`,
-      ``,
-      `Composition: IMPORTANT - both males stand on the LEFT side occupying left 55% of frame, right 45% must be completely empty clean background with no people for text overlay.`,
-      `Style: professional fashion photography, editorial magazine, Canon 5D, 85mm lens, natural skin texture, visible pores, masculine features, strong jawline, hyperrealistic, 8K, NOT anime, NOT illustration.`,
-      `No text, no logo, no watermark.`,
-    ].join('\n'),
-  },
+type BannerConfig = {
+  file: string;
+  label: string;
+  prompt: string;
+  referenceImages?: Array<{ filePath: string; weight: number }>;
+};
+
+const BANNER_CONFIGS: BannerConfig[] = [
+  // banner-1 已生成，如需重新生成请取消注释
+  // {
+  //   file: 'banner-1.png',
+  //   label: '林夏 + 裴司寒 + 沈意',
+  //   prompt: `...`,
+  // },
   {
     file: 'banner-2.png',
-    label: '裴司寒 + 言澈',
-    prompt: [
-      `Wide cinematic commercial poster, two real handsome Caucasian Western male models, photorealistic photography, real human skin, strong masculine features, NOT Asian, NOT anime, NOT CG, NOT illustration.`,
-      ``,
-      `Left male (background, smaller): dark medium wavy hair, 31 years old, mysterious deep eyes, wearing black tuxedo with black bow tie, slightly turned sideways, standing behind.`,
-      `Right male (foreground, main, larger and closer): black short slicked-back hair, 22 years old, sharp strong jawline, muscular build, wearing white tuxedo with pink bow tie, looking directly at camera, cold confident expression.`,
-      ``,
-      `Background: dreamy pink purple gradient, sparkling bokeh lights, floating soap bubbles, romantic festive atmosphere.`,
-      ``,
-      `Composition: IMPORTANT - both males positioned on the LEFT side occupying left 55% of frame, right 45% must be completely empty clean background with no people for text overlay.`,
-      `Style: professional fashion photography, editorial magazine, Canon 5D, 85mm lens, natural skin texture, masculine features, hyperrealistic, 8K, NOT anime, NOT illustration.`,
-      `No text, no logo, no watermark.`,
-    ].join('\n'),
+    label: '顾知予（前景主角）+ 周翌（左后）+ 言澈（右后）',
+    prompt: `Photorealistic cinematic fashion photography, three real Caucasian male models, wide banner composition 4:1 ratio, dramatic three-layer depth of field.
+
+FOREGROUND — center protagonist (顾知予): short neat dark brown hair, 30 years old, Caucasian male, clean sharp European facial features, warm gentle eyes, strong but soft jawline. Wearing dark navy blazer over open-collar white shirt. Standing closest to camera, largest figure, sharp focus, direct warm gaze into camera, slight calm smile, one hand lightly touching chest. Full upper body visible.
+
+BACKGROUND LEFT (周翌): dark curly brown hair, 27 years old, Caucasian male, fashionable artistic European features, wearing cream-white ribbed turtleneck sweater. Standing behind and to the left of center male, slightly smaller scale, slightly out of focus (shallow depth of field bokeh), body angled inward, soft thoughtful expression glancing toward camera.
+
+BACKGROUND RIGHT (言澈): dark brown medium-length straight hair, 31 years old, Caucasian male, deep-set European eyes, strong artistic features, wearing black casual blazer. Standing behind and to the right of center male, slightly smaller scale, slightly out of focus, head tilted slightly downward, intense yet tender gaze toward camera.
+
+THREE-LAYER COMPOSITION: foreground male sharp and large, background two males softer and smaller — creates strong cinematic depth. Natural spacing between figures, NOT crowded together, NOT touching. All three occupy LEFT 55% of frame.
+
+Skin: visible pores, natural skin texture, realistic imperfections, NOT airbrushed, NOT plastic, NOT smooth beauty filter. Shot on Canon 5D Mark IV 85mm f/1.8, natural skin tones, slight film grain.
+
+Background atmosphere: soft warm pink and violet romantic mood, gentle rose petals falling slowly, translucent soap bubbles floating, small glowing hearts drifting, warm pink-magenta light halo behind characters, soft golden light particles, dreamy bokeh circles in pink and purple. Lighting is soft and warm, NOT harsh, NOT dark.
+
+RIGHT 45% of frame: completely empty soft pink-purple gradient background, rose petals and bokeh only, absolutely NO people, clean negative space for text overlay.
+
+NOT anime, NOT CG render, NOT illustration, NOT Asian faces. Photorealistic real humans only.
+No text, no watermark, no logo, no border.`,
+    referenceImages: [
+      { filePath: path.join(process.cwd(), 'public', 'characters', 'gu-portrait.png'),   weight: 0.9 },
+      { filePath: path.join(process.cwd(), 'public', 'characters', 'zhou-portrait.png'), weight: 0.85 },
+      { filePath: path.join(process.cwd(), 'public', 'characters', 'yan-portrait.png'),  weight: 0.85 },
+    ],
   },
 ];
 
 // ── API 调用 ───────────────────────────────────────────────────────────────
-async function callImageAPI(prompt: string): Promise<string> {
+async function callImageAPI(
+  prompt: string,
+  referenceImages?: Array<{ filePath: string; weight: number }>,
+): Promise<string> {
   if (!API_KEY) throw new Error('IMAGE_ARK_API_KEY 未在 .env.local 中设置');
+
+  const body: Record<string, unknown> = {
+    model: MODEL,
+    prompt,
+    n: 1,
+    size: IMAGE_SIZE,
+    response_format: 'url',
+    watermark: false,
+  };
+
+  if (referenceImages && referenceImages.length > 0) {
+    body.reference_images = referenceImages.map(({ filePath, weight }) => {
+      const data = fs.readFileSync(filePath);
+      const base64 = data.toString('base64');
+      const ext = path.extname(filePath).slice(1).toLowerCase();
+      const mime = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
+      console.log(`  🖼️  参考图: ${path.basename(filePath)} (weight=${weight})`);
+      return { image: `data:${mime};base64,${base64}`, weight };
+    });
+  }
 
   const res = await fetch(`${BASE_URL}/images/generations`, {
     method: 'POST',
@@ -87,14 +112,7 @@ async function callImageAPI(prompt: string): Promise<string> {
       Authorization: `Bearer ${API_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: MODEL,
-      prompt,
-      n: 1,
-      size: IMAGE_SIZE,
-      response_format: 'url',
-      watermark: false,
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
@@ -117,9 +135,49 @@ async function downloadAndSave(url: string, filePath: string): Promise<void> {
   console.log(`  ✅ 已保存: ${filePath}  (${(buffer.length / 1024).toFixed(0)} KB)`);
 }
 
+async function cropToBannerRatio(filePath: string): Promise<void> {
+  const TARGET_WIDTH = 1910;
+  const TARGET_HEIGHT = 440;
+
+  const backupPath = filePath.replace(/\.png$/, '.original.png');
+  fs.copyFileSync(filePath, backupPath);
+  console.log(`  💾 已备份原图: ${path.basename(backupPath)}`);
+
+  const image = sharp(filePath);
+  const metadata = await image.metadata();
+  const { width = 0, height = 0 } = metadata;
+
+  console.log(`  📐 原始尺寸: ${width}x${height}`);
+
+  const sourceRatio = width / height;
+  const targetRatio = TARGET_WIDTH / TARGET_HEIGHT;
+
+  let cropWidth = width;
+  let cropHeight = height;
+  let left = 0;
+  let top = 0;
+
+  if (sourceRatio > targetRatio) {
+    cropWidth = Math.round(height * targetRatio);
+    left = 0;
+  } else {
+    cropHeight = Math.round(width / targetRatio);
+    const maxTop = height - cropHeight;
+    top = Math.max(0, Math.round(maxTop * 0.3));
+  }
+
+  await sharp(filePath)
+    .extract({ left, top, width: cropWidth, height: cropHeight })
+    .resize(TARGET_WIDTH, TARGET_HEIGHT)
+    .jpeg({ quality: 95 })
+    .toFile(filePath + '.tmp');
+
+  fs.renameSync(filePath + '.tmp', filePath);
+  console.log(`  ✂️  已裁剪为 ${TARGET_WIDTH}x${TARGET_HEIGHT}（top: ${top}px）`);
+}
+
 // ── 主流程 ─────────────────────────────────────────────────────────────────
 async function main() {
-  // ① 打印所有最终 prompt，供用户确认
   console.log('\n' + '═'.repeat(70));
   console.log('  Banner 图片生成脚本 — Prompt 预览');
   console.log('  模型: ' + MODEL + '  尺寸: ' + IMAGE_SIZE);
@@ -140,7 +198,6 @@ async function main() {
     return;
   }
 
-  // ② 生成图片
   if (!fs.existsSync(OUTPUT_DIR)) {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
     console.log(`\n📁 创建输出目录: ${OUTPUT_DIR}`);
@@ -148,14 +205,14 @@ async function main() {
 
   let success = 0;
   for (const cfg of BANNER_CONFIGS) {
-    console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+    console.log(`\n${'━'.repeat(70)}`);
     console.log(`🎨 生成中: ${cfg.file}  (${cfg.label})`);
     try {
-      const imageUrl = await callImageAPI(cfg.prompt);
+      const imageUrl = await callImageAPI(cfg.prompt, cfg.referenceImages);
       console.log(`  ✨ API 返回成功`);
       await downloadAndSave(imageUrl, path.join(OUTPUT_DIR, cfg.file));
+      await cropToBannerRatio(path.join(OUTPUT_DIR, cfg.file));
       success++;
-      // 避免请求过于密集
       if (success < BANNER_CONFIGS.length) await new Promise(r => setTimeout(r, 2000));
     } catch (err) {
       console.error(`  ❌ 失败:`, err instanceof Error ? err.message : err);
