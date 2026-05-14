@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 import { T } from '@/lib/tokens';
 import { useAuthState } from '@/lib/useAuth';
 
@@ -9,7 +10,24 @@ export function TopNav({ onPremiumClick }: { onPremiumClick?: () => void }) {
   const router = useRouter();
   const { isLoggedIn, email } = useAuthState();
   const [dropOpen, setDropOpen] = React.useState(false);
+  const [displayChar, setDisplayChar] = React.useState('');
   const dropRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!isLoggedIn) return;
+    const fetchChar = () => {
+      fetch('/api/user')
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+          const n: string = data.nickname || data.email || '';
+          setDisplayChar(n ? n[0].toUpperCase() : '我');
+        })
+        .catch(() => {});
+    };
+    fetchChar();
+    window.addEventListener('user-updated', fetchChar);
+    return () => window.removeEventListener('user-updated', fetchChar);
+  }, [isLoggedIn, email]);
 
   React.useEffect(() => {
     if (!dropOpen) return;
@@ -19,6 +37,11 @@ export function TopNav({ onPremiumClick }: { onPremiumClick?: () => void }) {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [dropOpen]);
+
+  const handleLogout = async () => {
+    setDropOpen(false);
+    await signOut({ callbackUrl: '/auth' });
+  };
 
   return (
     <div style={{ flexShrink: 0, height: 68, padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#111111', borderBottom: `1px solid ${T.border}`, zIndex: 30 }}>
@@ -62,7 +85,7 @@ export function TopNav({ onPremiumClick }: { onPremiumClick?: () => void }) {
                 style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
               >
                 <div style={{ width: 40, height: 40, borderRadius: '50%', background: `linear-gradient(140deg, ${T.pinkHi}, ${T.pink})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 16 }}>
-                  {email ? email[0].toUpperCase() : '我'}
+                  {displayChar || (email ? email[0].toUpperCase() : '我')}
                 </div>
                 <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 14, fontWeight: 500 }}>我的</span>
                 <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, transition: 'transform 0.2s', display: 'inline-block', transform: dropOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>∨</span>
@@ -72,21 +95,21 @@ export function TopNav({ onPremiumClick }: { onPremiumClick?: () => void }) {
                 <div style={{ position: 'absolute', top: 52, right: 0, width: 160, background: '#1a1a1a', border: `1px solid ${T.border}`, borderRadius: 12, overflow: 'hidden', zIndex: 100, boxShadow: '0 12px 36px rgba(0,0,0,0.5)' }}>
                   <div
                     onClick={() => { setDropOpen(false); router.push('/profile'); }}
-                    style={{ padding: '13px 18px', fontSize: 14, color: '#ffffff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, transition: 'color 0.15s' }}
-                    onMouseEnter={e => { e.currentTarget.style.color = T.pink; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; const svg = e.currentTarget.querySelector('svg'); if (svg) svg.setAttribute('fill', T.pink); }}
-                    onMouseLeave={e => { e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.background = 'transparent'; const svg = e.currentTarget.querySelector('svg'); if (svg) svg.setAttribute('fill', 'white'); }}
+                    style={{ padding: '13px 18px', fontSize: 14, color: '#ffffff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                    onMouseEnter={e => { e.currentTarget.style.color = T.pink; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.background = 'transparent'; }}
                   >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
                     我的资料
                   </div>
                   <div style={{ height: 1, background: T.border }} />
                   <div
-                    onClick={async () => { setDropOpen(false); await fetch('/api/auth/logout', { method: 'POST' }); router.push('/auth'); }}
-                    style={{ padding: '13px 18px', fontSize: 14, color: '#ffffff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, transition: 'color 0.15s' }}
-                    onMouseEnter={e => { e.currentTarget.style.color = T.pink; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; const svg = e.currentTarget.querySelector('svg'); if (svg) svg.setAttribute('fill', T.pink); }}
-                    onMouseLeave={e => { e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.background = 'transparent'; const svg = e.currentTarget.querySelector('svg'); if (svg) svg.setAttribute('fill', 'white'); }}
+                    onClick={handleLogout}
+                    style={{ padding: '13px 18px', fontSize: 14, color: '#ffffff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                    onMouseEnter={e => { e.currentTarget.style.color = T.pink; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.background = 'transparent'; }}
                   >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
                     退出登录
                   </div>
                 </div>

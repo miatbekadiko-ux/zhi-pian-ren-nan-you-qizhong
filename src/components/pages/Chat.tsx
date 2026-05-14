@@ -24,6 +24,36 @@ const CHAT_CSS = `
 type ImgState = 'pending' | 'loading' | 'done';
 type Msg = { id: number; role: 'user' | 'ai'; text: string; imageUrl?: string | null; imgState?: ImgState };
 
+// ── 自动播放 TTS helper ──────────────────────────────────────────────
+async function autoPlayTTS(text: string, characterId: string) {
+  if (typeof window === 'undefined') return;
+  if (localStorage.getItem('zprn_tts') !== 'true') return;
+
+  try {
+    const res = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, characterId }),
+    });
+    if (res.ok) {
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.onended = () => URL.revokeObjectURL(url);
+      audio.onerror = () => URL.revokeObjectURL(url);
+      audio.play();
+      return;
+    }
+  } catch { /* fall through to browser TTS */ }
+
+  // fallback: 浏览器原生 TTS
+  if ('speechSynthesis' in window) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN';
+    window.speechSynthesis.speak(u);
+  }
+}
+
 function Avatar({ c, size = 36 }: { c: Character; size?: number }) {
   if (c.portraitUrl) {
     return (
@@ -264,7 +294,7 @@ export function PageChat() {
 
   useEffect(() => {
     if (!isLoggedIn) { setMessages([]); return; }
-    if (isTyping) return;  // AI 回复中不重新加载
+    if (isTyping) return;
     setMessages([]);
     const controller = new AbortController();
 
@@ -306,7 +336,6 @@ export function PageChat() {
 
     const tempId = tempIdRef.current--;
     setInput('');
-    // Add user message immediately — stays visible throughout the whole AI response cycle
     setMessages(prev => [...prev, { id: tempId, role: 'user', text }]);
     setIsTyping(true);
 
@@ -325,9 +354,7 @@ export function PageChat() {
 
       setIsTyping(false);
       setMessages(prev => {
-        // 如果 AI 消息已经存在，直接返回，防止重复追加
         if (prev.some(m => m.id === aiMsgId)) return prev;
-
         const realUser: Msg = { id: data.userMessage.id, role: 'user', text: data.userMessage.content ?? text };
         const aiMsg: Msg = { id: aiMsgId, role: 'ai', text: data.aiMessage.content, imageUrl: data.aiMessage.imageUrl, imgState: hasImage ? 'pending' : undefined };
         const hasTempReplaced = prev.some(m => m.id === tempId);
@@ -335,12 +362,14 @@ export function PageChat() {
         return hasTempReplaced ? [...replaced, aiMsg] : [...prev, realUser, aiMsg];
       });
 
+      // ── 自动播放 TTS（如果用户开启了设置开关）──
+      autoPlayTTS(data.aiMessage.content, activeId);
+
       setConvoPreviews(prev => ({
         ...prev,
         [activeId]: { lastMessagePreview: data.aiMessage.content, updatedAt: new Date().toISOString() },
       }));
 
-      // Two-step image reveal: 400ms → show loading dots; 1800ms → show image
       if (hasImage) {
         setTimeout(() => {
           setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, imgState: 'loading' as const } : m));
@@ -351,7 +380,6 @@ export function PageChat() {
       }
     } catch {
       setIsTyping(false);
-      // On error: preserve the user message (convert temp id so it survives future message loads)
       setMessages(prev => prev.map(m => m.id === tempId ? { ...m, id: -tempId + 9e6 } : m));
     }
   }, [input, isTyping, isLoggedIn, activeId]);
@@ -363,7 +391,6 @@ export function PageChat() {
     }
   };
 
-  // Close three-dot menu when clicking outside
   useEffect(() => {
     if (!menuOpen) return;
     const handler = (e: MouseEvent) => {
@@ -389,7 +416,6 @@ export function PageChat() {
     });
   }, [activeId]);
 
-  // Only show characters the user has actually chatted with, sorted by most recent
   const conversations = characters
     .filter(c => !!convoPreviews[c.id])
     .map(c => {
@@ -412,22 +438,17 @@ export function PageChat() {
 
         <TopNav onPremiumClick={() => setPremiumOpen(true)} />
 
-        {/* ── Content row below navbar ── */}
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
 
-          {/* Col 1: Sidebar */}
           <Sidebar active="chat" onVipClick={() => setPremiumOpen(true)} />
 
-          {/* Col 2: 对话列表 */}
           <div style={{ width: 260, background: T.panel, borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-            {/* Col2 header — 58px 对齐 */}
             <div style={{ height: 58, padding: '0 18px', borderBottom: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', justifyContent: 'center', flexShrink: 0 }}>
               <div style={{ fontSize: 20, fontWeight: 700 }}>聊天</div>
               <div style={{ fontSize: 11, color: T.textMute, marginTop: 1, letterSpacing: 0.5 }}>
                 {conversations.length > 0 ? `${conversations.length} 条对话记录` : '去首页选一位男友开始聊天吧'}
               </div>
             </div>
-            {/* 搜索框 */}
             <div style={{ padding: '10px 12px', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: T.panel3, border: `1px solid ${T.border}`, borderRadius: 8, fontSize: 12, color: T.textMute }}>
                 <span>🔍</span>搜索消息
@@ -440,9 +461,7 @@ export function PageChat() {
             </div>
           </div>
 
-          {/* Col 3+4 */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
-            {/* 58px header — 角色头像 + 名字 + 操作按钮 */}
             <div style={{ height: 58, padding: '0 16px 0 22px', display: 'flex', alignItems: 'center', borderBottom: `1px solid ${T.border}`, background: T.panel, flexShrink: 0, gap: 12 }}>
               <Avatar c={active} size={38} />
               <div style={{ flex: 1 }}>
@@ -466,10 +485,8 @@ export function PageChat() {
                 </button>
               </div>
             </div>
-            {/* 聊天区 + 人物面板 */}
-            <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
 
-              {/* 聊天消息 + 输入框 */}
+            <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, background: T.bg }}>
                 <div style={{ flex: 1, overflow: 'auto', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
                   <DateSep label="今天" />
@@ -511,7 +528,6 @@ export function PageChat() {
                 </div>
               </div>
 
-              {/* 人物面板 */}
               {panelOpen && (
                 <div style={{ width: 280, background: T.panel, borderLeft: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
                   <div style={{ flex: '0 0 56%', position: 'relative', overflow: 'hidden' }}>

@@ -24,5 +24,6 @@ export function useAuthState() {
     isLoading: status === 'loading',
     email: session?.user?.email ?? '',
     userId: session?.user?.id ?? null,
+    name: session?.user?.name ?? '',
   };
 }
