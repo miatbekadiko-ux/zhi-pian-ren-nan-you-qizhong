@@ -36,7 +36,7 @@ function SettingRow({ icon, title, sub, right, muted, pink }: {
         <Icon name={icon} size={15} />
       </div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 13, fontWeight: 500, color: pink ? T.pink : T.text }}>{title}</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: pink ? T.pink : T.text }}>{title}</div>
         {sub && <div style={{ fontSize: 11, color: T.textMute, marginTop: 2 }}>{sub}</div>}
       </div>
       <div>{right}</div>
@@ -66,7 +66,7 @@ export function PageSettings() {
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
         <Sidebar active="gear" onVipClick={() => setPremiumOpen(true)} />
         <div style={{ flex: 1, padding: '36px 48px', overflow: 'auto' }}>
-          <div style={{ maxWidth: 640, margin: '0 auto' }}>
+          <div style={{ maxWidth: 960, margin: '0 auto' }}>
             <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>设置</div>
             <div style={{ fontSize: 13, color: T.textMute, marginBottom: 28 }}>调整偏好与账号选项。</div>
             <SettingsGroup title="偏好">

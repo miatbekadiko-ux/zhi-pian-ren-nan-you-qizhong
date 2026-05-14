@@ -378,18 +378,20 @@ export function PageChat() {
         {/* ── Content row below navbar ── */}
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
 
-          {/* Col 1: Sidebar — same full style as home page */}
+          {/* Col 1: Sidebar */}
           <Sidebar active="chat" onVipClick={() => setPremiumOpen(true)} />
 
-          {/* Col 2: Conversation list */}
+          {/* Col 2: 对话列表 */}
           <div style={{ width: 260, background: T.panel, borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-            <div style={{ padding: '20px 18px 14px', flexShrink: 0 }}>
+            {/* Col2 header — 58px 对齐 */}
+            <div style={{ height: 58, padding: '0 18px', borderBottom: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', justifyContent: 'center', flexShrink: 0 }}>
               <div style={{ fontSize: 20, fontWeight: 700 }}>聊天</div>
-              <div style={{ fontSize: 11, color: T.textMute, marginTop: 2, letterSpacing: 1 }}>
+              <div style={{ fontSize: 11, color: T.textMute, marginTop: 1, letterSpacing: 0.5 }}>
                 {conversations.length > 0 ? `${conversations.length} 条对话记录` : '去首页选一位男友开始聊天吧'}
               </div>
             </div>
-            <div style={{ padding: '0 12px 12px', flexShrink: 0 }}>
+            {/* 搜索框 */}
+            <div style={{ padding: '10px 12px', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: T.panel3, border: `1px solid ${T.border}`, borderRadius: 8, fontSize: 12, color: T.textMute }}>
                 <span>🔍</span>搜索消息
               </div>
@@ -401,61 +403,36 @@ export function PageChat() {
             </div>
           </div>
 
-          {/* Col 3+4: Right big area — flex column */}
+          {/* Col 3+4 */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
-
-            {/* ── Shared character header spanning chat + info panel ── */}
+            {/* 58px header — 角色头像 + 名字 + 操作按钮 */}
             <div style={{ height: 58, padding: '0 16px 0 22px', display: 'flex', alignItems: 'center', borderBottom: `1px solid ${T.border}`, background: T.panel, flexShrink: 0, gap: 12 }}>
               <Avatar c={active} size={38} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 24, fontWeight: 600, color: T.text, lineHeight: 1.15 }}>{active.name}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 22, fontWeight: 600, color: T.text }}>{active.name}</div>
               </div>
-
-              {/* Right action buttons */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-
-                {/* Three-dot menu */}
                 <div ref={menuRef} style={{ position: 'relative' }}>
-                  <button
-                    onClick={() => setMenuOpen(v => !v)}
-                    type="button"
-                    style={{ width: 36, height: 36, borderRadius: 8, background: 'transparent', border: `1px solid ${T.border}`, color: T.textMute, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, letterSpacing: 1 }}
-                  >···</button>
+                  <button onClick={() => setMenuOpen(v => !v)} type="button" style={{ width: 40, height: 40, borderRadius: 10, background: T.panel2, border: `1px solid rgba(255,255,255,0.15)`, color: 'rgba(255,255,255,0.75)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, letterSpacing: 2 }}>···</button>
                   {menuOpen && (
                     <div style={{ position: 'absolute', top: 42, right: 0, width: 148, background: T.panel2, border: `1px solid ${T.border}`, borderRadius: 10, overflow: 'hidden', zIndex: 50, boxShadow: '0 8px 28px rgba(0,0,0,0.45)' }}>
-                      <button
-                        onClick={resetChat}
-                        type="button"
-                        style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', color: T.text, fontSize: 13, textAlign: 'left', cursor: 'pointer', display: 'block' }}
-                      >重置聊天</button>
+                      <button onClick={resetChat} type="button" style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', color: T.text, fontSize: 13, textAlign: 'left', cursor: 'pointer', display: 'block' }}>重置聊天</button>
                       <div style={{ height: 1, background: T.border }} />
-                      <button
-                        onClick={resetChat}
-                        type="button"
-                        style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', color: '#f87171', fontSize: 13, textAlign: 'left', cursor: 'pointer', display: 'block' }}
-                      >删除聊天</button>
+                      <button onClick={resetChat} type="button" style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', color: '#f87171', fontSize: 13, textAlign: 'left', cursor: 'pointer', display: 'block' }}>删除聊天</button>
                     </div>
                   )}
                 </div>
-
-                {/* Panel toggle */}
-                <button
-                  onClick={() => setPanelOpen(v => !v)}
-                  type="button"
-                  title={panelOpen ? '收起人物信息' : '展开人物信息'}
-                  style={{ width: 36, height: 36, borderRadius: 8, background: 'transparent', border: `1px solid ${T.border}`, color: T.textMute, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
+                <button onClick={() => setPanelOpen(v => !v)} type="button" style={{ width: 40, height: 40, borderRadius: 10, background: T.panel2, border: `1px solid rgba(255,255,255,0.15)`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ transform: panelOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.25s ease', display: 'flex', alignItems: 'center' }}>
                     <Icon name="arrow" size={14} color={T.textMute} />
                   </div>
                 </button>
               </div>
             </div>
-
-            {/* ── Chat + character panel row ── */}
+            {/* 聊天区 + 人物面板 */}
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
 
-              {/* Chat messages + input */}
+              {/* 聊天消息 + 输入框 */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, background: T.bg }}>
                 <div style={{ flex: 1, overflow: 'auto', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
                   <DateSep label="今天" />
@@ -497,12 +474,9 @@ export function PageChat() {
                 </div>
               </div>
 
-              {/* Character info panel — conditional */}
+              {/* 人物面板 */}
               {panelOpen && (
                 <div style={{ width: 280, background: T.panel, borderLeft: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
-                  {/* 20px breathing gap before image */}
-                  <div style={{ height: 20, flexShrink: 0 }} />
-                  {/* Portrait image — 56% of panel height */}
                   <div style={{ flex: '0 0 56%', position: 'relative', overflow: 'hidden' }}>
                     {active.portraitUrl ? (
                       <img src={active.portraitUrl} alt={active.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
@@ -515,9 +489,8 @@ export function PageChat() {
                     <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 14px)' }} />
                     <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 80, background: `linear-gradient(180deg, transparent, ${T.panel})` }} />
                   </div>
-                  {/* Info — name + age inline, story */}
                   <div style={{ flex: 1, overflow: 'auto', padding: '18px 22px' }}>
-                    <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 20, fontWeight: 600, color: T.text, display: 'flex', alignItems: 'baseline', gap: 0 }}>
+                    <div style={{ fontFamily: '"Noto Serif SC", serif', fontSize: 20, fontWeight: 600, color: T.text, display: 'flex', alignItems: 'baseline' }}>
                       {active.name}
                       <span style={{ fontSize: 14, fontWeight: 400, color: T.textDim, marginLeft: 16 }}>{active.age}岁</span>
                     </div>
@@ -525,7 +498,6 @@ export function PageChat() {
                   </div>
                 </div>
               )}
-
             </div>
           </div>
 
