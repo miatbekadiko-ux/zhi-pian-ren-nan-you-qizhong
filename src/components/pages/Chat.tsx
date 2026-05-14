@@ -93,6 +93,13 @@ function BubbleAI({ c, text, imageUrl, imgState }: { c: Character; text: string;
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    };
+  }, []);
+
   const stopPlayback = () => {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -232,8 +239,23 @@ export function PageChat() {
 
   useEffect(() => {
     const stored = localStorage.getItem('selectedCharacterId');
-    if (stored && characters.find(c => c.id === stored)) setActiveId(stored);
+    if (stored && characters.find(c => c.id === stored)) {
+      setActiveId(stored);
+    }
   }, []);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        const stored = localStorage.getItem('selectedCharacterId');
+        if (stored && characters.find(c => c.id === stored) && stored !== activeId) {
+          switchCharacter(stored);
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [activeId]);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -242,7 +264,11 @@ export function PageChat() {
 
   useEffect(() => {
     if (!isLoggedIn) { setMessages([]); return; }
-    fetch(`/api/chat?characterId=${activeId}`)
+    if (isTyping) return;  // AI 回复中不重新加载
+    setMessages([]);
+    const controller = new AbortController();
+
+    fetch(`/api/chat?characterId=${activeId}`, { signal: controller.signal })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(data => {
         setMessages(data.messages.map((m: { id: number; role: string; content: string; imageUrl?: string | null }) => ({
@@ -250,10 +276,13 @@ export function PageChat() {
           role: (m.role === 'user' ? 'user' : 'ai') as 'user' | 'ai',
           text: m.content,
           imageUrl: m.imageUrl,
-          // historical messages: no imgState → show image directly
         })));
       })
-      .catch(() => {});
+      .catch(err => {
+        if (err.name !== 'AbortError') console.error(err);
+      });
+
+    return () => controller.abort();
   }, [activeId, isLoggedIn]);
 
   useEffect(() => {
@@ -263,11 +292,11 @@ export function PageChat() {
   const active = characters.find(c => c.id === activeId) ?? characters[1];
 
   const switchCharacter = (id: string) => {
+    setMessages([]);
+    setIsTyping(false);
+    setInput('');
     setActiveId(id);
     localStorage.setItem('selectedCharacterId', id);
-    setMessages([]);
-    setInput('');
-    setIsTyping(false);
   };
 
   const sendMessage = useCallback(async () => {
@@ -295,19 +324,16 @@ export function PageChat() {
       const hasImage = !!data.aiMessage.imageUrl;
 
       setIsTyping(false);
-      setMessages(prev => [
-        // Replace temp user msg with real one; keep all other existing messages
-        ...prev.filter(m => m.id !== tempId),
-        { id: data.userMessage.id, role: 'user' as const, text: data.userMessage.content ?? text },
-        {
-          id: aiMsgId,
-          role: 'ai' as const,
-          text: data.aiMessage.content,
-          imageUrl: data.aiMessage.imageUrl,
-          // Start with 'pending': text bubble shows, image section hidden
-          imgState: hasImage ? 'pending' as const : undefined,
-        },
-      ]);
+      setMessages(prev => {
+        // 如果 AI 消息已经存在，直接返回，防止重复追加
+        if (prev.some(m => m.id === aiMsgId)) return prev;
+
+        const realUser: Msg = { id: data.userMessage.id, role: 'user', text: data.userMessage.content ?? text };
+        const aiMsg: Msg = { id: aiMsgId, role: 'ai', text: data.aiMessage.content, imageUrl: data.aiMessage.imageUrl, imgState: hasImage ? 'pending' : undefined };
+        const hasTempReplaced = prev.some(m => m.id === tempId);
+        const replaced = prev.map(m => m.id === tempId ? realUser : m);
+        return hasTempReplaced ? [...replaced, aiMsg] : [...prev, realUser, aiMsg];
+      });
 
       setConvoPreviews(prev => ({
         ...prev,
@@ -351,6 +377,17 @@ export function PageChat() {
     setMenuOpen(false);
     setMessages([]);
   }, []);
+
+  const deleteChat = useCallback(async () => {
+    setMenuOpen(false);
+    await fetch(`/api/conversations?characterId=${activeId}`, { method: 'DELETE' });
+    setMessages([]);
+    setConvoPreviews(prev => {
+      const next = { ...prev };
+      delete next[activeId];
+      return next;
+    });
+  }, [activeId]);
 
   // Only show characters the user has actually chatted with, sorted by most recent
   const conversations = characters
@@ -418,7 +455,7 @@ export function PageChat() {
                     <div style={{ position: 'absolute', top: 42, right: 0, width: 148, background: T.panel2, border: `1px solid ${T.border}`, borderRadius: 10, overflow: 'hidden', zIndex: 50, boxShadow: '0 8px 28px rgba(0,0,0,0.45)' }}>
                       <button onClick={resetChat} type="button" style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', color: T.text, fontSize: 13, textAlign: 'left', cursor: 'pointer', display: 'block' }}>重置聊天</button>
                       <div style={{ height: 1, background: T.border }} />
-                      <button onClick={resetChat} type="button" style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', color: '#f87171', fontSize: 13, textAlign: 'left', cursor: 'pointer', display: 'block' }}>删除聊天</button>
+                      <button onClick={deleteChat} type="button" style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', color: '#f87171', fontSize: 13, textAlign: 'left', cursor: 'pointer', display: 'block' }}>删除聊天</button>
                     </div>
                   )}
                 </div>

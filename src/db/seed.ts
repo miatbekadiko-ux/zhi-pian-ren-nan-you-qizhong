@@ -69,8 +69,7 @@ const SEED_CHARACTERS = [
 ];
 
 export async function seedCharacters() {
-  const existing = await db.select().from(characters).limit(1);
-  if (existing.length > 0) return;
+  // 用 upsert 替代跳过，确保新角色始终同步
   await db.insert(characters).values(SEED_CHARACTERS).onConflictDoNothing();
 }
 

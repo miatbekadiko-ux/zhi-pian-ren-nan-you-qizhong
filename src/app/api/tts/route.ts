@@ -9,13 +9,15 @@ type VoiceConfig = {
   volume_ratio?: number;
 };
 
-// Only these three male voices are activated on this account.
-// lin / gu get dedicated voices; pei / shen share M392 with tuned params.
 const CHARACTER_VOICES: Record<string, VoiceConfig> = {
-  lin:  { voice_type: 'zh_male_yangguangqingnian_moon_bigtts' },           // 阳光青年
-  pei:  { voice_type: 'zh_male_aojiaobazong_moon_bigtts' },     // 傲娇霸总，冷傲低沉
-  shen: { voice_type: 'zh_male_qingshuangnanda_mars_bigtts' },  // 清爽男大，轻快傲娇
-  gu:   { voice_type: 'zh_male_yourougongzi_emo_v2_mars_bigtts' },          // 温柔公子情感版
+  lin:  { voice_type: 'zh_male_qingshuangnanda_uranus_bigtts' },
+  pei:  { voice_type: 'zh_male_aojiaobazong_moon_bigtts' },
+  shen: { voice_type: 'zh_male_kailangxuezhang_uranus_bigtts' },
+  gu:   { voice_type: 'zh_male_m191_uranus_bigtts' },
+  kai:  { voice_type: 'zh_male_lengkugege_emo_v2_mars_bigtts' },
+  zhou: { voice_type: 'ICL_zh_male_yourougongzi_tob' },
+  cao:  { voice_type: 'ICL_zh_male_siwenqingnian_tob' },
+  yan:  { voice_type: 'ICL_zh_male_ruyazongcai_tob' },
 };
 
 export async function POST(req: NextRequest) {
