@@ -165,7 +165,7 @@ export function PageHome() {
       <PremiumModal open={premiumOpen} onClose={() => setPremiumOpen(false)} />
       <TopNav onPremiumClick={() => setPremiumOpen(true)} />
       <div style={{ flex:1, display:'flex', minHeight:0, overflow:'hidden' }}>
-        <Sidebar active="home" collapsed={collapsed} collapsed={collapsed} onVipClick={() => setPremiumOpen(true)} />
+        <Sidebar active="home" collapsed={collapsed} onVipClick={() => setPremiumOpen(true)} />
         <div style={{ flex:1, minHeight:0, overflow:'auto' }}>
           <div style={{ padding:'20px 24px 0 24px' }}>
             <PromoBanner onStart={() => router.push(navTarget)} onNavigate={handleChat} />
