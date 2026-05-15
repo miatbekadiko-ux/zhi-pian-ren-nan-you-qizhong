@@ -111,10 +111,9 @@ export function PageProfile() {
         <Sidebar active="user" onVipClick={() => setPremiumOpen(true)} />
         <div style={{ flex: 1, padding: '36px 48px', overflow: 'auto' }}>
           <div style={{ maxWidth: 760, margin: '0 auto' }}>
-            <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>我的资料</div>
-            <div style={{ fontSize: 13, color: T.textMute, marginBottom: 28 }}>管理你的账号信息与个人喜好。</div>
+            <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, textAlign: 'center' }}>我的资料</div>
+            <div style={{ fontSize: 13, color: T.textMute, marginBottom: 28, textAlign: 'center' }}>管理你的账号信息与个人喜好。</div>
 
-            {/* 头像区 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, paddingBottom: 26, borderBottom: `1px solid ${T.border}`, marginBottom: 26 }}>
               <div style={{ width: 96, height: 96, borderRadius: '50%', background: `linear-gradient(140deg, ${T.pinkHi}, ${T.pink})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 36, fontWeight: 700, border: `2px solid ${T.pink}`, boxShadow: '0 0 0 4px rgba(212,83,126,0.08)', flexShrink: 0 }}>
                 {loading ? <Icon name="user" size={42} /> : avatarChar}
@@ -125,7 +124,6 @@ export function PageProfile() {
               </div>
             </div>
 
-            {/* 基本信息 */}
             <div style={{ fontSize: 11, letterSpacing: 2, color: T.textMute, textTransform: 'uppercase', marginBottom: 14 }}>基本信息</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
               <div>

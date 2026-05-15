@@ -71,17 +71,28 @@ function ConvoRow({ c, last, time, active: isActive, unread, onClick }: { c: Cha
   const [hovered, setHovered] = React.useState(false);
   const overlay = isActive || hovered;
   return (
-    <div onClick={onClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} style={{ display: 'flex', gap: 10, padding: '12px 14px', margin: '2px 6px', borderRadius: 16, position: 'relative', background: overlay ? 'rgba(255,255,255,0.10)' : 'transparent', border: '1px solid transparent', cursor: 'pointer', transition: 'background 0.2s ease, border 0.2s ease' }}>
-      {isActive && <div style={{ position: 'absolute', left: -6, top: 12, bottom: 12, width: 2, background: T.pink, borderRadius: 2 }} />}
-      <Avatar c={c} size={40} />
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'flex', gap: 14, padding: '16px 18px',
+        margin: '2px 6px', borderRadius: 16, position: 'relative',
+        background: overlay ? 'rgba(255,255,255,0.10)' : 'transparent',
+        border: '1px solid transparent',
+        cursor: 'pointer', transition: 'background 0.2s ease',
+      }}
+    >
+      {isActive && <div style={{ position: 'absolute', left: -6, top: 14, bottom: 14, width: 3, background: T.pink, borderRadius: 2 }} />}
+      <Avatar c={c} size={48} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: T.text }}>{c.name}</div>
-          <div style={{ fontSize: 10, color: T.textMute }}>{time}</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>{c.name}</div>
+          <div style={{ fontSize: 11, color: T.textMute }}>{time}</div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-          <div style={{ flex: 1, fontSize: 12, color: T.textMute, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{last}</div>
-          {unread && <div style={{ minWidth: 18, height: 18, padding: '0 5px', borderRadius: 9, background: T.pink, color: 'white', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>{unread}</div>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+          <div style={{ flex: 1, fontSize: 13, color: T.textMute, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{last}</div>
+          {unread && <div style={{ minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10, background: T.pink, color: 'white', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>{unread}</div>}
         </div>
       </div>
     </div>
@@ -505,7 +516,7 @@ export function PageChat() {
 
           <Sidebar active="chat" onVipClick={() => setPremiumOpen(true)} />
 
-          <div style={{ width: 260, background: T.panel, borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+          <div style={{ width: 300, background: T.panel, borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
             <div style={{ height: 58, padding: '0 18px', borderBottom: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', justifyContent: 'center', flexShrink: 0 }}>
               <div style={{ fontSize: 20, fontWeight: 700 }}>聊天</div>
               <div style={{ fontSize: 11, color: T.textMute, marginTop: 1, letterSpacing: 0.5 }}>
@@ -532,7 +543,9 @@ export function PageChat() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                 <div ref={menuRef} style={{ position: 'relative' }}>
-                  <button onClick={() => setMenuOpen(v => !v)} type="button" style={{ width: 40, height: 40, borderRadius: 10, background: T.panel2, border: `1px solid rgba(255,255,255,0.15)`, color: 'rgba(255,255,255,0.75)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, letterSpacing: 2 }}>···</button>
+                  <button onClick={() => setMenuOpen(v => !v)} type="button" style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.10)', border: `1px solid rgba(255,255,255,0.25)`, color: 'rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="4" height="18" viewBox="0 0 4 18" fill="currentColor"><circle cx="2" cy="2" r="2"/><circle cx="2" cy="9" r="2"/><circle cx="2" cy="16" r="2"/></svg>
+                  </button>
                   {menuOpen && (
                     <div style={{ position: 'absolute', top: 42, right: 0, width: 148, background: T.panel2, border: `1px solid ${T.border}`, borderRadius: 10, overflow: 'hidden', zIndex: 50, boxShadow: '0 8px 28px rgba(0,0,0,0.45)' }}>
                       <button onClick={resetChat} type="button" style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', color: T.text, fontSize: 13, textAlign: 'left', cursor: 'pointer', display: 'block' }}>重置聊天</button>
@@ -541,7 +554,7 @@ export function PageChat() {
                     </div>
                   )}
                 </div>
-                <button onClick={() => setPanelOpen(v => !v)} type="button" style={{ width: 40, height: 40, borderRadius: 10, background: T.panel2, border: `1px solid rgba(255,255,255,0.15)`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <button onClick={() => setPanelOpen(v => !v)} type="button" style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.10)', border: `1px solid rgba(255,255,255,0.25)`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ transform: panelOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.25s ease', display: 'flex', alignItems: 'center' }}>
                     <Icon name="arrow" size={14} color={T.textMute} />
                   </div>

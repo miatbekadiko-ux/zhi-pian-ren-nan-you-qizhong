@@ -88,22 +88,22 @@ export function Sidebar({ active, locked = false, collapsed = false, onVipClick 
             onMouseEnter={() => setHovered(it.key)}
             onMouseLeave={() => setHovered(null)}
             style={{
-              width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', borderRadius: 20,
+              width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '18px 20px', borderRadius: 20,
               background: overlay ? 'rgba(255,255,255,0.10)' : 'transparent',
               border: overlay ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.06)',
               cursor: locked ? 'default' : 'pointer',
-              textAlign: 'left', fontSize: 15, fontWeight: 500,
+              textAlign: 'left', fontSize: 16, fontWeight: 500,
               transition: 'background 0.2s ease',
             }}
           >
-            <div style={{ width: 38, height: 38, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: overlay ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)', color: locked ? '#3a3437' : overlay ? '#ffffff' : 'rgba(255,255,255,0.75)', transition: 'background 0.2s ease' }}>
-              <Icon name={it.icon} size={20} />
+            <div style={{ width: 42, height: 42, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: overlay ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)', color: locked ? '#3a3437' : overlay ? '#ffffff' : 'rgba(255,255,255,0.75)', transition: 'background 0.2s ease' }}>
+              <Icon name={it.icon} size={22} />
             </div>
             <span style={{ color: overlay ? '#ffffff' : 'rgba(255,255,255,0.75)' }}>{it.label}</span>
           </button>
         );
       })}
-      <div style={{ marginTop: 10, padding: '18px 18px', borderRadius: 20, background: vipHovered ? 'rgba(255,255,255,0.10)' : 'transparent', border: `1.5px solid ${vipHovered ? 'rgba(201,161,110,0.7)' : 'rgba(201,161,110,0.35)'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer', transition: 'background 0.2s ease, border 0.2s ease' }} onClick={() => onVipClick ? onVipClick() : router.push('/settings')} onMouseEnter={() => setVipHovered(true)} onMouseLeave={() => setVipHovered(false)}>
+      <div style={{ marginTop: 10, padding: '20px 18px', borderRadius: 20, background: vipHovered ? 'rgba(255,255,255,0.10)' : 'transparent', border: `1.5px solid ${vipHovered ? 'rgba(201,161,110,0.7)' : 'rgba(201,161,110,0.35)'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer', transition: 'background 0.2s ease, border 0.2s ease' }} onClick={() => onVipClick ? onVipClick() : router.push('/settings')} onMouseEnter={() => setVipHovered(true)} onMouseLeave={() => setVipHovered(false)}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Icon name="gem" size={20} color="#C9A16E" />
           <span style={{ fontSize: 14, fontWeight: 700, color: '#C9A16E' }}>会员</span>

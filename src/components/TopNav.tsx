@@ -8,7 +8,7 @@ import { useAuthState } from '@/lib/useAuth';
 
 export function TopNav({ onPremiumClick }: { onPremiumClick?: () => void }) {
   const router = useRouter();
-  const { isLoggedIn, email } = useAuthState();
+  const { isLoggedIn, isLoading, email } = useAuthState();
   const [dropOpen, setDropOpen] = React.useState(false);
   const [displayChar, setDisplayChar] = React.useState('');
   const dropRef = React.useRef<HTMLDivElement>(null);
@@ -49,7 +49,7 @@ export function TopNav({ onPremiumClick }: { onPremiumClick?: () => void }) {
         纸片人<span style={{ color: T.pink }}>男友</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 48 }}>
-        {isLoggedIn ? (
+        {isLoading ? null : isLoggedIn ? (
           <>
             <button
               onClick={onPremiumClick}

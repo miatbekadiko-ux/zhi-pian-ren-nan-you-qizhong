@@ -1,41 +1,22 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Sidebar } from '@/components/Sidebar';
+import { TopNav } from '@/components/TopNav';
 
 const PLANS = [
-  {
-    id: 0,
-    duration: '12个月',
-    discount: '省70%',
-    price: '¥28',
-    original: '¥96/月',
-    best: true,
-  },
-  {
-    id: 1,
-    duration: '3个月',
-    discount: '省35%',
-    price: '¥62',
-    original: '¥96/月',
-    best: false,
-  },
-  {
-    id: 2,
-    duration: '1个月',
-    discount: '',
-    price: '¥96',
-    original: '',
-    best: false,
-  },
+  { id: 0, duration: '12个月', discountBadge: '70% OFF', label: 'BEST VALUE', price: '¥28', original: '¥96', highlight: true },
+  { id: 1, duration: '3个月', discountBadge: '35% OFF', label: '', price: '¥62', original: '¥96', highlight: false },
+  { id: 2, duration: '1个月', discountBadge: '', label: '', price: '¥96', original: '', highlight: false },
 ];
 
 const BENEFITS = [
-  '无限制对话消息',
-  '解锁更多专属角色',
-  '更长的记忆上下文（AI记住更多你们的故事）',
-  '每月赠送专属代币/积分',
-  '专属会员标识/称号',
-  '新角色优先体验资格',
+  { emoji: '✨', text: '无限制对话消息' },
+  { emoji: '🔥', text: '解锁更多专属角色' },
+  { emoji: '🧠', text: 'AI记住更多你们的故事' },
+  { emoji: '🪙', text: '每月赠送专属代币/积分' },
+  { emoji: '⭐', text: '专属会员标识/称号' },
+  { emoji: '🎁', text: '新角色优先体验资格' },
 ];
 
 interface PremiumModalProps {
@@ -43,258 +24,176 @@ interface PremiumModalProps {
   onClose: () => void;
 }
 
-export function PremiumModal({ open, onClose }: PremiumModalProps) {
-  const [activeTab, setActiveTab] = useState(0);
-  const [selectedCard, setSelectedCard] = useState(0);
+function PlanCard({ plan }: { plan: typeof PLANS[0] }) {
+  const [hovered, setHovered] = useState(false);
+  const isHL = plan.highlight;
 
-  if (!open) return null;
-
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose();
-  };
+  const cardBg = isHL
+    ? hovered
+      ? 'linear-gradient(to top, #c0185a 0%, #7a1040 40%, #2a0a1a 75%, #140810 100%)'
+      : 'linear-gradient(to top, #8b1040 0%, #4a0a28 35%, #1a0810 65%, #100608 100%)'
+    : hovered
+      ? '#1e1e1e'
+      : '#141414';
 
   return (
     <div
-      onClick={handleOverlayClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.75)',
-        backdropFilter: 'blur(4px)',
-        zIndex: 200,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        background: cardBg,
+        border: 'none',
+        boxShadow: isHL
+          ? 'inset 1px 1px 0px rgba(255,150,180,0.12)'
+          : hovered
+            ? 'inset 1px 1px 0px rgba(255,255,255,0.07)'
+            : 'inset 1px 1px 0px rgba(255,255,255,0.04)',
+        borderRadius: 20,
+        padding: '22px 18px 20px',
+        cursor: 'pointer',
+        transition: 'background 0.35s ease, box-shadow 0.2s ease',
       }}
     >
-      <div
-        style={{
-          background: '#0d0d0d',
-          border: '1px solid #2e2e2e',
-          borderRadius: 24,
-          padding: '50px 40px 40px',
-          width: '90%',
-          maxWidth: 720,
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          position: 'relative',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <button
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: 16,
-            right: 20,
-            background: 'none',
-            border: 'none',
-            color: '#aaa',
-            fontSize: '1.4rem',
-            cursor: 'pointer',
-            lineHeight: 1,
-          }}
-        >
-          ✕
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+        <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>{plan.duration}</span>
+        {plan.discountBadge && (
+          <span style={{ background: '#f5a623', color: '#000', fontSize: '0.68rem', fontWeight: 800, padding: '3px 9px', borderRadius: 20 }}>
+            {plan.discountBadge}
+          </span>
+        )}
+      </div>
+
+      {plan.label
+        ? <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#ff5a8a', marginBottom: 14, letterSpacing: '0.04em' }}>{plan.label}</div>
+        : <div style={{ marginBottom: 14, height: 16 }} />
+      }
+
+      <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#fff', lineHeight: 1, marginBottom: 4 }}>
+        {plan.price}
+        <span style={{ fontSize: '0.85rem', fontWeight: 400, color: 'rgba(255,255,255,0.5)' }}>/月</span>
+      </div>
+
+      {plan.original
+        ? <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.28)', textDecoration: 'line-through', marginBottom: 18 }}>{plan.original}/月</div>
+        : <div style={{ marginBottom: 18, height: 18 }} />
+      }
+
+      {isHL ? (
+        <button style={{
+          display: 'block', width: '100%', padding: '11px 0',
+          borderRadius: 50, border: 'none',
+          background: 'linear-gradient(135deg, #ff5a8a, #e0306a)',
+          color: '#fff', fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer',
+          boxShadow: '0 0 14px rgba(255,90,138,0.3), 0 2px 8px rgba(255,90,138,0.2)',
+          pointerEvents: 'none',
+        }}>
+          立即开始
         </button>
+      ) : (
+        <button style={{
+          display: 'block', width: '100%', padding: '11px 0',
+          borderRadius: 50, border: 'none',
+          background: hovered ? '#333' : '#1e1e1e',
+          color: '#fff', fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer',
+          transition: 'background 0.2s',
+          pointerEvents: 'none',
+        }}>
+          立即开始
+        </button>
+      )}
+    </div>
+  );
+}
 
-        <h1 style={{ fontSize: '1.9rem', fontWeight: 800, marginBottom: 8, color: '#fff' }}>
-          选择你的方案
-        </h1>
-        <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: 36 }}>
-          已获全球 5,000 万用户信赖
-        </p>
+export function PremiumModal({ open, onClose }: PremiumModalProps) {
+  if (!open) return null;
 
-        {/* Plan Tabs */}
-        <div
-          style={{
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 200,
+      display: 'flex', flexDirection: 'column',
+      background: '#0a0a0a', color: '#fff',
+      fontFamily: '"Noto Sans SC", system-ui, sans-serif',
+      overflow: 'hidden',
+    }}>
+      {/* 导航栏，overflow hidden 确保光晕不往上渗 */}
+      <div style={{ flexShrink: 0, overflow: 'hidden' }}>
+        <TopNav onPremiumClick={() => {}} />
+      </div>
+
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
+        <Sidebar active="" onVipClick={() => {}} />
+
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+
+          {/* 光晕：作为内容区第一个元素，紧贴导航栏下方，绝对不会渗入导航栏 */}
+          <div style={{
+            height: 0,
             display: 'flex',
-            background: '#1a1a1a',
-            borderRadius: 50,
-            padding: 5,
-            marginBottom: 32,
-            gap: 4,
-          }}
-        >
-          {[
-            { label: '12个月', badge: '最优惠' },
-            { label: '3个月', badge: '' },
-            { label: '1个月', badge: '' },
-          ].map((tab, i) => (
-            <div
-              key={i}
-              onClick={() => { setActiveTab(i); setSelectedCard(i); }}
-              style={{
-                position: 'relative',
-                padding: '10px 26px',
-                borderRadius: 50,
-                cursor: 'pointer',
-                fontSize: '0.92rem',
-                color: activeTab === i ? '#fff' : '#aaa',
-                fontWeight: activeTab === i ? 600 : 400,
-                background: activeTab === i ? 'linear-gradient(135deg, #d63384, #a020f0)' : 'transparent',
-                transition: 'all 0.2s',
-                userSelect: 'none',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {tab.label}
-              {tab.badge && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: -10,
-                    right: -4,
-                    background: '#ff4d4d',
-                    color: '#fff',
-                    fontSize: '0.62rem',
-                    fontWeight: 700,
-                    padding: '2px 7px',
-                    borderRadius: 20,
-                  }}
-                >
-                  {tab.badge}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Plan Cards */}
-        <div
-          style={{
-            display: 'flex',
-            gap: 16,
-            flexWrap: 'wrap',
             justifyContent: 'center',
-            marginBottom: 40,
-          }}
-        >
-          {PLANS.map((plan) => (
-            <div
-              key={plan.id}
-              onClick={() => setSelectedCard(plan.id)}
-              style={{
-                background: '#1a1a1a',
-                border: `1.5px solid ${selectedCard === plan.id ? '#d63384' : '#2e2e2e'}`,
-                borderRadius: 20,
-                padding: '28px 22px',
-                width: 190,
-                textAlign: 'center',
-                position: 'relative',
-                cursor: 'pointer',
-                transition: 'border-color 0.2s',
-              }}
-            >
-              {plan.best && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: -12,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: 'linear-gradient(135deg, #d63384, #a020f0)',
-                    color: '#fff',
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    padding: '3px 12px',
-                    borderRadius: 20,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  最优选择
-                </div>
-              )}
-              <div style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: 5, color: '#fff' }}>
-                {plan.duration}
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#d63384', fontWeight: 600, marginBottom: 12, minHeight: 18 }}>
-                {plan.discount}
-              </div>
-              <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#fff' }}>
-                {plan.price}
-                <span style={{ fontSize: '0.9rem', fontWeight: 400, color: '#aaa' }}>/月</span>
-              </div>
-              <div style={{ fontSize: '0.82rem', color: '#666', textDecoration: 'line-through', marginTop: 4, marginBottom: 18, minHeight: 18 }}>
-                {plan.original}
-              </div>
-              <button
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: '11px 0',
-                  borderRadius: 50,
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #d63384, #a020f0)',
-                  color: '#fff',
-                  fontSize: '0.92rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  opacity: 0.9,
-                }}
-              >
-                立即开始
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Benefits */}
-        <div
-          style={{
-            background: '#1a1a1a',
-            border: '1.5px solid #2e2e2e',
-            borderRadius: 20,
-            padding: '30px 34px',
-            width: '100%',
-            marginBottom: 28,
-          }}
-        >
-          <div style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 18, color: '#fff' }}>
-            高级会员权益
+            overflow: 'visible',
+            pointerEvents: 'none',
+          }}>
+            <div style={{
+              width: '50%',
+              height: 10,
+              background: 'rgba(255,90,138,1)',
+              borderRadius: '50%',
+              filter: 'blur(32px)',
+              marginTop: 0,
+            }} />
           </div>
-          {BENEFITS.map((b, i) => (
-            <div
-              key={i}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                marginBottom: i < BENEFITS.length - 1 ? 14 : 0,
-                fontSize: '0.92rem',
-                color: '#e0e0e0',
-              }}
-            >
-              <div
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #d63384, #a020f0)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  fontSize: '0.7rem',
-                  color: '#fff',
-                }}
-              >
-                ✓
-              </div>
-              {b}
-            </div>
-          ))}
-        </div>
 
-        {/* Trust */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
-          {['🧾 账单显示为「纸片人男友」', '❌ 随时可在设置中取消订阅'].map((text, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#888', fontSize: '0.85rem' }}>
-              {text}
+          <div style={{ padding: '36px 48px 40px' }}>
+            <div style={{ maxWidth: 760, margin: '0 auto' }}>
+
+              <h1 style={{ fontSize: '1.9rem', fontWeight: 800, color: '#fff', textAlign: 'center', marginBottom: 6, letterSpacing: '-0.02em' }}>
+                选择你的方案
+              </h1>
+              <p style={{ color: '#666', fontSize: '0.85rem', marginBottom: 28, textAlign: 'center' }}>
+                已获全球 5,000 万用户信赖
+              </p>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 28 }}>
+                {PLANS.map((plan) => <PlanCard key={plan.id} plan={plan} />)}
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#444', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
+                  高级会员权益
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  {BENEFITS.map((b, i) => (
+                    <div key={i} style={{
+                      background: '#111', border: '1px solid #1a1a1a',
+                      borderRadius: 14, padding: '12px 16px',
+                      display: 'flex', alignItems: 'center', gap: 12,
+                    }}>
+                      <span style={{ fontSize: '1.4rem', flexShrink: 0 }}>{b.emoji}</span>
+                      <span style={{ fontSize: '0.85rem', color: '#bbb', fontWeight: 500, lineHeight: 1.3 }}>{b.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {[
+                  { icon: '🧾', text: '账单显示为「纸片人男友」' },
+                  { icon: '🔓', text: '随时可在设置中取消订阅' },
+                ].map((item, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '11px 16px', background: '#0d0d0d',
+                    border: '1px solid #181818', borderRadius: 12,
+                  }}>
+                    <span style={{ fontSize: '1.1rem', flexShrink: 0, opacity: 0.5 }}>{item.icon}</span>
+                    <span style={{ fontSize: '0.78rem', color: '#555', lineHeight: 1.4 }}>{item.text}</span>
+                  </div>
+                ))}
+              </div>
+
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </div>
