@@ -8,7 +8,7 @@ import { Icon } from '@/components/Icon';
 import { characters } from '@/lib/characters';
 import { useAuthState } from '@/lib/useAuth';
 import { PremiumModal } from '@/components/PremiumModal';
-import { TopNav } from '@/components/TopNav';
+import { TopNav, useSidebarCollapsed } from '@/components/TopNav';
 
 const BANNER_CSS = `
   @keyframes pb-in-r  { from { opacity:0; transform:translateX(48px); } to { opacity:1; transform:none; } }
@@ -32,8 +32,6 @@ type PosterProps = {
 };
 
 function Poster({ ids, anim, isEnter, posterIndex, onStart, onNavigate }: PosterProps) {
-
-  // ── 第一张 ──────────────────────────────────────────────────────
   if (posterIndex === 0) {
     return (
       <div style={{ position:'absolute', inset:0, animation:`${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents:isEnter?'auto':'none', overflow:'hidden' }}>
@@ -48,8 +46,6 @@ function Poster({ ids, anim, isEnter, posterIndex, onStart, onNavigate }: Poster
       </div>
     );
   }
-
-  // ── 第二张 ──────────────────────────────────────────────────────
   if (posterIndex === 1) {
     return (
       <div style={{ position:'absolute', inset:0, animation:`${anim} 0.54s cubic-bezier(0.22,1,0.36,1) both`, pointerEvents:isEnter?'auto':'none', overflow:'hidden' }}>
@@ -64,7 +60,6 @@ function Poster({ ids, anim, isEnter, posterIndex, onStart, onNavigate }: Poster
       </div>
     );
   }
-
 }
 
 function PromoBanner({ onStart, onNavigate }: { onStart: () => void; onNavigate: (id: string) => void }) {
@@ -100,15 +95,7 @@ function PromoBanner({ onStart, onNavigate }: { onStart: () => void; onNavigate:
     const pair = POSTER_PAIRS[pIdx];
     if (!pair) return null;
     return (
-      <Poster
-        key={key}
-        ids={pair.ids}
-        anim={isEnter ? enterAnim : exitAnim}
-        isEnter={isEnter}
-        posterIndex={pIdx}
-        onStart={onStart}
-        onNavigate={onNavigate}
-      />
+      <Poster key={key} ids={pair.ids} anim={isEnter ? enterAnim : exitAnim} isEnter={isEnter} posterIndex={pIdx} onStart={onStart} onNavigate={onNavigate} />
     );
   };
 
@@ -118,14 +105,12 @@ function PromoBanner({ onStart, onNavigate }: { onStart: () => void; onNavigate:
       <div style={{ height:280, position:'relative', overflow:'hidden', background:'#06000e', maxWidth:'100%', borderRadius:16 }}>
         {exitIdx !== null && renderPoster(exitIdx, false, `exit-${exitIdx}-${animKey}`)}
         {renderPoster(idx, true, `enter-${idx}-${animKey}`)}
-
         <button onClick={prev} type="button" aria-label="上一张" style={{ position:'absolute', left:20, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', zIndex:10, padding:8, display:'flex', alignItems:'center', filter:'drop-shadow(0 2px 8px rgba(0,0,0,0.6))' }}>
           <Icon name="arrow" size={26} color="rgba(255,255,255,0.82)" />
         </button>
         <button onClick={next} type="button" aria-label="下一张" style={{ position:'absolute', right:20, top:'50%', transform:'translateY(-50%) rotate(180deg)', background:'none', border:'none', cursor:'pointer', zIndex:10, padding:8, display:'flex', alignItems:'center', filter:'drop-shadow(0 2px 8px rgba(0,0,0,0.6))' }}>
           <Icon name="arrow" size={26} color="rgba(255,255,255,0.82)" />
         </button>
-
         <div style={{ position:'absolute', bottom:16, left:'50%', transform:'translateX(-50%)', display:'flex', gap:8, zIndex:10 }}>
           {POSTER_PAIRS.map((_, i) => (
             <div key={i} onClick={() => go(i, i > idx ? 'r' : 'l')} style={{ width:i===idx?22:6, height:6, borderRadius:3, background:i===idx?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.32)', transition:'width 0.32s ease', cursor:'pointer' }} />
@@ -140,29 +125,13 @@ function CharacterCard({ c, onChat }: { c: typeof characters[number]; onChat: ()
   const [isHover, setIsHover] = React.useState(false);
   const isNew = c.id === 'kai' || c.id === 'yan';
   return (
-    <div
-      onMouseEnter={() => setIsHover(true)}
-      onMouseLeave={() => setIsHover(false)}
-      style={{
-        background: T.panel2, border:'1px solid transparent', borderRadius:24,
-        overflow:'hidden', display:'flex', flexDirection:'column',
-        boxShadow: isHover ? '0 28px 70px rgba(212,83,126,0.18)' : '0 8px 22px rgba(0,0,0,0.35)',
-        transition:'transform 0.28s ease, box-shadow 0.28s ease',
-        transform: isHover ? 'scale(1.02)' : 'scale(1)',
-        cursor:'pointer',
-      }}
-      onClick={onChat}
-    >
+    <div onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)} style={{ background: T.panel2, border:'1px solid transparent', borderRadius:24, overflow:'hidden', display:'flex', flexDirection:'column', boxShadow: isHover ? '0 28px 70px rgba(212,83,126,0.18)' : '0 8px 22px rgba(0,0,0,0.35)', transition:'transform 0.28s ease, box-shadow 0.28s ease', transform: isHover ? 'scale(1.02)' : 'scale(1)', cursor:'pointer' }} onClick={onChat}>
       <div style={{ position:'relative', height:380, overflow:'hidden' }}>
         <div style={{ position:'absolute', inset:0, background:c.grad }} />
         <div style={{ position:'absolute', inset:0, backgroundImage:'repeating-linear-gradient(135deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 14px)' }} />
         <div style={{ position:'absolute', inset:0, background:'radial-gradient(120% 90% at 50% 30%, transparent 50%, rgba(0,0,0,0.45) 100%)' }} />
-        {c.portraitUrl && (
-          <img src={c.portraitUrl} alt={c.name} style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }} />
-        )}
-        {isNew && (
-          <div style={{ position:'absolute', top:16, right:16, padding:'6px 10px', borderRadius:99, background:'rgba(255,255,255,0.12)', color:'#fff', fontSize:11, fontWeight:700, letterSpacing:0.5, backdropFilter:'blur(8px)', zIndex:4 }}>新</div>
-        )}
+        {c.portraitUrl && (<img src={c.portraitUrl} alt={c.name} style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }} />)}
+        {isNew && (<div style={{ position:'absolute', top:16, right:16, padding:'6px 10px', borderRadius:99, background:'rgba(255,255,255,0.12)', color:'#fff', fontSize:11, fontWeight:700, letterSpacing:0.5, backdropFilter:'blur(8px)', zIndex:4 }}>新</div>)}
         <div style={{ position:'absolute', left:0, right:0, bottom:0, height:200, background:`linear-gradient(180deg, transparent 0%, rgba(22,20,22,0.55) 45%, ${T.panel2} 100%)`, pointerEvents:'none', zIndex:2 }} />
         <div style={{ position:'absolute', left:16, right:16, bottom:14, pointerEvents:'none', zIndex:3 }}>
           <div style={{ display:'flex', alignItems:'baseline', gap:10, marginBottom:2 }}>
@@ -182,6 +151,7 @@ export function PageHome() {
   const router = useRouter();
   const { isLoggedIn } = useAuthState();
   const [premiumOpen, setPremiumOpen] = React.useState(false);
+  const { collapsed } = useSidebarCollapsed();
 
   const handleChat = (characterId: string) => {
     localStorage.setItem('selectedCharacterId', characterId);
@@ -195,7 +165,7 @@ export function PageHome() {
       <PremiumModal open={premiumOpen} onClose={() => setPremiumOpen(false)} />
       <TopNav onPremiumClick={() => setPremiumOpen(true)} />
       <div style={{ flex:1, display:'flex', minHeight:0, overflow:'hidden' }}>
-        <Sidebar active="home" onVipClick={() => setPremiumOpen(true)} />
+        <Sidebar active="home" collapsed={collapsed} collapsed={collapsed} onVipClick={() => setPremiumOpen(true)} />
         <div style={{ flex:1, minHeight:0, overflow:'auto' }}>
           <div style={{ padding:'20px 24px 0 24px' }}>
             <PromoBanner onStart={() => router.push(navTarget)} onNavigate={handleChat} />

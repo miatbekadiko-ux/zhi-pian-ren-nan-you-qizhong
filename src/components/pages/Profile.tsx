@@ -4,7 +4,7 @@ import React from 'react';
 import { T } from '@/lib/tokens';
 import { Sidebar } from '@/components/Sidebar';
 import { Icon } from '@/components/Icon';
-import { TopNav } from '@/components/TopNav';
+import { TopNav, useSidebarCollapsed } from '@/components/TopNav';
 import { PremiumModal } from '@/components/PremiumModal';
 import { useAuthState } from '@/lib/useAuth';
 
@@ -55,6 +55,7 @@ function PasswordField() {
 
 export function PageProfile() {
   const [premiumOpen, setPremiumOpen] = React.useState(false);
+  const { collapsed } = useSidebarCollapsed();
   const { email } = useAuthState();
   const [nickname, setNickname] = React.useState('');
   const [birthday, setBirthday] = React.useState('');
@@ -108,7 +109,7 @@ export function PageProfile() {
       <PremiumModal open={premiumOpen} onClose={() => setPremiumOpen(false)} />
       <TopNav onPremiumClick={() => setPremiumOpen(true)} />
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
-        <Sidebar active="user" onVipClick={() => setPremiumOpen(true)} />
+        <Sidebar active="user" collapsed={collapsed} onVipClick={() => setPremiumOpen(true)} />
         <div style={{ flex: 1, padding: '36px 48px', overflow: 'auto' }}>
           <div style={{ maxWidth: 760, margin: '0 auto' }}>
             <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, textAlign: 'center' }}>我的资料</div>

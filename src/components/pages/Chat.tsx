@@ -8,7 +8,7 @@ import { Icon } from '@/components/Icon';
 import { characters, Character } from '@/lib/characters';
 import { useAuthState } from '@/lib/useAuth';
 import { PremiumModal } from '@/components/PremiumModal';
-import { TopNav } from '@/components/TopNav';
+import { TopNav, useSidebarCollapsed } from '@/components/TopNav';
 
 const CHAT_CSS = `
   @keyframes typing-dot {
@@ -287,6 +287,7 @@ export function PageChat() {
   const router = useRouter();
   const { isLoggedIn } = useAuthState();
   const [premiumOpen, setPremiumOpen] = useState(false);
+  const { collapsed } = useSidebarCollapsed();
   const [activeId, setActiveId] = useState<string>('pei');
   const [messages, setMessages] = useState<Msg[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -480,7 +481,7 @@ export function PageChat() {
 
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
 
-          <Sidebar active="chat" onVipClick={() => setPremiumOpen(true)} />
+          <Sidebar active="chat" collapsed={collapsed} onVipClick={() => setPremiumOpen(true)} />
 
           {/* 左侧聊天列表 */}
           <div style={{ width: 300, background: T.panel, borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>

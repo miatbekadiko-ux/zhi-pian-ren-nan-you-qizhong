@@ -5,7 +5,7 @@ import { signOut } from 'next-auth/react';
 import { T } from '@/lib/tokens';
 import { Sidebar } from '@/components/Sidebar';
 import { Icon } from '@/components/Icon';
-import { TopNav } from '@/components/TopNav';
+import { TopNav, useSidebarCollapsed } from '@/components/TopNav';
 import { PremiumModal } from '@/components/PremiumModal';
 
 const LANG_KEY = 'zprn_lang';
@@ -114,6 +114,7 @@ function Toast({ msg }: { msg: string }) {
 
 export function PageSettings() {
   const [premiumOpen, setPremiumOpen] = React.useState(false);
+  const { collapsed } = useSidebarCollapsed();
   const [lang, setLang] = React.useState<Lang>('zh');
   const [notif, setNotif] = React.useState(true);
   const [tts, setTts] = React.useState(false);
@@ -155,7 +156,7 @@ export function PageSettings() {
       {toast && <Toast msg={toast} />}
       <TopNav onPremiumClick={() => setPremiumOpen(true)} />
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
-        <Sidebar active="gear" onVipClick={() => setPremiumOpen(true)} />
+        <Sidebar active="gear" collapsed={collapsed} onVipClick={() => setPremiumOpen(true)} />
         <div style={{ flex: 1, padding: '36px 48px', overflow: 'auto' }}>
           <div style={{ maxWidth: 760, margin: '0 auto' }}>
             <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4, textAlign: 'center' }}>{c.title}</div>
