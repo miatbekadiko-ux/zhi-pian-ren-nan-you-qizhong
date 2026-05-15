@@ -82,15 +82,12 @@ export async function POST(req: NextRequest) {
   // Get AI reply
   const aiText = await getAIReply(characterId, contextMessages, content.trim(), stage);
 
-  // Trigger image generation if user message matches keywords
-  const imageUrl = shouldGenerateImage(content.trim())
-    ? await generateCharacterImage(characterId)
-    : null;
+  const willGenerateImage = shouldGenerateImage(content.trim());
 
-  // Save AI message
+  // Save AI message immediately (imageUrl null, filled in async)
   const [aiMsg] = await db
     .insert(messages)
-    .values({ conversationId: convo.id, role: 'assistant', content: aiText, imageUrl })
+    .values({ conversationId: convo.id, role: 'assistant', content: aiText, imageUrl: null })
     .returning();
 
   // Update conversation timestamp and last preview
@@ -99,5 +96,12 @@ export async function POST(req: NextRequest) {
     .set({ updatedAt: new Date(), lastMessagePreview: aiText.slice(0, 60) })
     .where(eq(conversations.id, convo.id));
 
-  return NextResponse.json({ userMessage: userMsg, aiMessage: aiMsg });
+  // Fire-and-forget image generation — don't block the response
+  if (willGenerateImage) {
+    generateCharacterImage(characterId).then(async (imageUrl) => {
+      await db.update(messages).set({ imageUrl }).where(eq(messages.id, aiMsg.id));
+    }).catch(() => {});
+  }
+
+  return NextResponse.json({ userMessage: userMsg, aiMessage: aiMsg, generatingImage: willGenerateImage });
 }

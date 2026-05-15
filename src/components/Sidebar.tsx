@@ -22,6 +22,7 @@ interface SidebarProps {
 export function Sidebar({ active, locked = false, collapsed = false, onVipClick }: SidebarProps) {
   const router = useRouter();
   const [hovered, setHovered] = React.useState<string | null>(null);
+  const [vipHovered, setVipHovered] = React.useState(false);
   const items = [
     { key: 'home', icon: 'home', label: '首页' },
     { key: 'chat', icon: 'chat', label: '聊天' },
@@ -63,7 +64,9 @@ export function Sidebar({ active, locked = false, collapsed = false, onVipClick 
           type="button"
           title="会员"
           onClick={() => onVipClick ? onVipClick() : router.push('/settings')}
-          style={{ width: 44, height: 44, borderRadius: 14, background: 'transparent', border: '1px solid rgba(201,161,110,0.3)', color: '#C9A16E', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onMouseEnter={() => setVipHovered(true)}
+          onMouseLeave={() => setVipHovered(false)}
+          style={{ width: 44, height: 44, borderRadius: 14, background: vipHovered ? 'rgba(201,161,110,0.15)' : 'transparent', border: `1px solid ${vipHovered ? 'rgba(201,161,110,0.7)' : 'rgba(201,161,110,0.3)'}`, color: '#C9A16E', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s ease, border 0.2s ease' }}
         >
           <Icon name="gem" size={20} color="#C9A16E" />
         </button>
@@ -100,7 +103,7 @@ export function Sidebar({ active, locked = false, collapsed = false, onVipClick 
           </button>
         );
       })}
-      <div style={{ marginTop: 10, padding: '18px 18px', borderRadius: 20, background: 'transparent', border: '1.5px solid rgba(201,161,110,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer' }} onClick={() => onVipClick ? onVipClick() : router.push('/settings')}>
+      <div style={{ marginTop: 10, padding: '18px 18px', borderRadius: 20, background: vipHovered ? 'rgba(255,255,255,0.10)' : 'transparent', border: `1.5px solid ${vipHovered ? 'rgba(201,161,110,0.7)' : 'rgba(201,161,110,0.35)'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer', transition: 'background 0.2s ease, border 0.2s ease' }} onClick={() => onVipClick ? onVipClick() : router.push('/settings')} onMouseEnter={() => setVipHovered(true)} onMouseLeave={() => setVipHovered(false)}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Icon name="gem" size={20} color="#C9A16E" />
           <span style={{ fontSize: 14, fontWeight: 700, color: '#C9A16E' }}>会员</span>
