@@ -303,6 +303,7 @@ export function PageChat() {
   const isTypingRef = useRef(false);
   const sendingRef = useRef(false);
   const activeIdRef = useRef(activeId);
+  const [messagesLoading, setMessagesLoading] = useState(false);
 
   const loadConvoPreviews = useCallback(() => {
     fetch('/api/conversations')
@@ -340,25 +341,37 @@ export function PageChat() {
     loadConvoPreviews();
   }, [isLoggedIn, loadConvoPreviews]);
 
+  // ── 只在 activeId 真正切换时拉历史消息，与发消息逻辑完全隔离 ──
+  // 用 ref 存 isLoggedIn，避免 isLoggedIn 变化触发重拉覆盖乐观更新
+  const isLoggedInRef = useRef(isLoggedIn);
+  useEffect(() => { isLoggedInRef.current = isLoggedIn; }, [isLoggedIn]);
+
   useEffect(() => {
-    if (!isLoggedIn) { setMessages([]); return; }
-    if (isTypingRef.current) return;
+    if (!isLoggedInRef.current) { setMessages([]); setMessagesLoading(false); return; }
+    // 发消息期间 activeId 不变，这个 effect 不会触发，安全
     let cancelled = false;
     const controller = new AbortController();
+    setMessagesLoading(true);
     fetch(`/api/chat?characterId=${activeId}`, { signal: controller.signal })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(data => {
         if (cancelled) return;
+        // 只有在没有进行中的发送时才覆盖（双重保险）
+        if (sendingRef.current || isTypingRef.current) { setMessagesLoading(false); return; }
         setMessages(data.messages.map((m: { id: number; role: string; content: string; imageUrl?: string | null }) => ({
           id: m.id,
           role: (m.role === 'user' ? 'user' : 'ai') as 'user' | 'ai',
           text: m.content,
           imageUrl: m.imageUrl,
         })));
+        setMessagesLoading(false);
       })
-      .catch(err => { if (err.name !== 'AbortError') console.error(err); });
+      .catch(err => {
+        if (err.name !== 'AbortError') console.error(err);
+        if (!cancelled) setMessagesLoading(false);
+      });
     return () => { cancelled = true; controller.abort(); };
-  }, [activeId, isLoggedIn]);
+  }, [activeId]);  // ← 只依赖 activeId，isLoggedIn 变化不触发重拉
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -371,27 +384,33 @@ export function PageChat() {
   const switchCharacter = (id: string) => {
     activeIdRef.current = id;
     sendingRef.current = false;
-    setMessages([]);
     isTypingRef.current = false;
     setIsTyping(false);
     setInput('');
     setActiveId(id);
     localStorage.setItem('selectedCharacterId', id);
+    // 不插入占位数据：未发过消息的角色不应出现在列表里
   };
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
     if (!text || isTyping || sendingRef.current) return;
     if (!isLoggedIn) { setShowLoginModal(true); return; }
+
     const currentCharacterId = activeId;
-    sendingRef.current = true;
     const tempId = tempIdRef.current--;
     const capturedTempId = tempId;
-    setInput('');
-    setMessages(prev => [...prev, { id: tempId, role: 'user', text }]);
+
+    // 标记发送中，阻止 useEffect 拉取覆盖
+    sendingRef.current = true;
     isTypingRef.current = true;
+
+    setInput('');
+    // 乐观追加用户消息
+    setMessages(prev => [...prev, { id: capturedTempId, role: 'user', text }]);
     setIsTyping(true);
     setConvoPreviews(prev => ({ ...prev, [currentCharacterId]: { lastMessagePreview: text, updatedAt: new Date().toISOString() } }));
+
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -401,22 +420,36 @@ export function PageChat() {
       if (!res.ok) throw new Error('request failed');
       const data = await res.json();
       if (!data?.userMessage || !data?.aiMessage) throw new Error('invalid response');
+
       const aiMsgId = data.aiMessage.id;
       const generatingImage = !!data.generatingImage;
-      if (activeIdRef.current !== currentCharacterId) return;
+
+      if (activeIdRef.current !== currentCharacterId) {
+        sendingRef.current = false;
+        isTypingRef.current = false;
+        return;
+      }
+
       isTypingRef.current = false;
       setIsTyping(false);
+
+      // 用真实 ID 替换临时消息，追加 AI 回复
       setMessages(prev => {
-        if (prev.some(m => m.id === aiMsgId)) return prev;
+        // 去掉临时消息，换成真实用户消息 + AI 消息
+        const withoutTemp = prev.filter(m => m.id !== capturedTempId);
         const realUser: Msg = { id: data.userMessage.id, role: 'user', text: data.userMessage.content ?? text };
         const aiMsg: Msg = { id: aiMsgId, role: 'ai', text: data.aiMessage.content, imageUrl: null, imgState: generatingImage ? 'loading' : undefined };
-        const hasTemp = prev.some(m => m.id === capturedTempId);
-        const replaced = prev.map(m => m.id === capturedTempId ? realUser : m);
-        return hasTemp ? [...replaced, aiMsg] : [...prev, realUser, aiMsg];
+        // 防止重复（极端情况）
+        const alreadyHasAi = withoutTemp.some(m => m.id === aiMsgId);
+        const alreadyHasUser = withoutTemp.some(m => m.id === realUser.id);
+        const base = alreadyHasUser ? withoutTemp : [...withoutTemp, realUser];
+        return alreadyHasAi ? base : [...base, aiMsg];
       });
+
       autoPlayTTS(data.aiMessage.content, activeId);
       setConvoPreviews(prev => ({ ...prev, [currentCharacterId]: { lastMessagePreview: data.aiMessage.content, updatedAt: new Date().toISOString() } }));
       sendingRef.current = false;
+
       if (generatingImage) {
         (async () => {
           for (let i = 0; i < 30; i++) {
@@ -437,7 +470,8 @@ export function PageChat() {
       sendingRef.current = false;
       isTypingRef.current = false;
       setIsTyping(false);
-      setMessages(prev => prev.map(m => m.id === tempId ? { ...m, id: -tempId + 9e6 } : m));
+      // 发送失败：把临时消息标记为错误态（给个新 id 避免 key 冲突）
+      setMessages(prev => prev.map(m => m.id === capturedTempId ? { ...m, id: capturedTempId - 9e6 } : m));
     }
   }, [input, isTyping, isLoggedIn, activeId]);
 
@@ -454,7 +488,11 @@ export function PageChat() {
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
 
-  const resetChat = useCallback(() => { setMenuOpen(false); setMessages([]); }, []);
+  const resetChat = useCallback(async () => {
+    setMenuOpen(false);
+    await fetch(`/api/conversations?characterId=${activeId}`, { method: 'DELETE' });
+    setMessages([]);
+  }, [activeId]);
 
   const deleteChat = useCallback(async () => {
     setMenuOpen(false);
@@ -463,6 +501,7 @@ export function PageChat() {
     setConvoPreviews(prev => { const next = { ...prev }; delete next[activeId]; return next; });
   }, [activeId]);
 
+  // 只显示真实有过对话的角色（有 convoPreviews 数据才入列表）
   const conversations = characters
     .filter(c => !!convoPreviews[c.id])
     .map(c => {
@@ -568,7 +607,10 @@ export function PageChat() {
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, background: T.bg }}>
                 <div style={{ flex: 1, overflow: 'auto', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
                   <DateSep label="今天" />
-                  {messages.length === 0 && (
+                  {messagesLoading && (
+                    <div style={{ textAlign: 'center', color: T.textMute, fontSize: 13, marginTop: 20, opacity: 0.5 }}>加载中…</div>
+                  )}
+                  {!messagesLoading && messages.length === 0 && (
                     <div style={{ textAlign: 'center', color: T.textMute, fontSize: 13, marginTop: 20 }}>和{active.name}说些什么吧~</div>
                   )}
                   {messages.map(msg => {
