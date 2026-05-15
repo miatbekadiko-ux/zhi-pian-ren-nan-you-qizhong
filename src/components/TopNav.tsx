@@ -110,18 +110,16 @@ export function TopNav({ onPremiumClick }: { onPremiumClick?: () => void }) {
         </div>
       </div>
 
-      {/* 右侧：去掉 marginRight，贴齐右侧 padding */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+      {/* 右侧 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         {isLoading ? null : isLoggedIn ? (
           <>
-            {/* Premium 按钮 */}
+            {/* 已登录：高级会员按钮 */}
             <button
               onClick={onPremiumClick}
               type="button"
               style={{
                 height: 36,
-                minHeight: 36,
-                maxHeight: 36,
                 padding: '0 16px',
                 borderRadius: 999,
                 border: '1.5px solid rgba(139,92,246,0.8)',
@@ -141,7 +139,7 @@ export function TopNav({ onPremiumClick }: { onPremiumClick?: () => void }) {
               <span style={{ color: '#ff5555', fontSize: 13, fontWeight: 800, lineHeight: 1 }}>7折优惠</span>
             </button>
 
-            {/* 头像 + 我的 + 箭头 */}
+            {/* 已登录：头像 + 我的 + 箭头 */}
             <div ref={dropRef} style={{ position: 'relative' }}>
               <div
                 onClick={() => setDropOpen(v => !v)}
@@ -181,13 +179,53 @@ export function TopNav({ onPremiumClick }: { onPremiumClick?: () => void }) {
             </div>
           </>
         ) : (
-          <button
-            onClick={() => router.push('/auth')}
-            type="button"
-            style={{ padding: '12px 24px', borderRadius: 999, border: '2px solid transparent', borderImage: 'linear-gradient(140deg, #FFD700, #FFB347) 1', background: '#111', color: '#FFD700', fontWeight: 700, cursor: 'pointer' }}
-          >
-            登录 / 注册
-          </button>
+          <>
+            {/* 未登录：高级会员按钮（同样显示） */}
+            <button
+              onClick={onPremiumClick}
+              type="button"
+              style={{
+                height: 36,
+                padding: '0 16px',
+                borderRadius: 999,
+                border: '1.5px solid rgba(139,92,246,0.8)',
+                background: 'linear-gradient(135deg, rgba(45,18,80,0.95) 0%, rgba(25,10,50,0.95) 100%)',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                whiteSpace: 'nowrap',
+                boxShadow: '0 0 12px rgba(139,92,246,0.35)',
+                lineHeight: 1,
+              }}
+            >
+              <div style={{ width: 14, height: 14, borderRadius: 3, background: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 50%, #4c1d95 100%)', boxShadow: '0 0 8px rgba(167,139,250,0.8)', transform: 'rotate(45deg)', flexShrink: 0 }} />
+              <span style={{ color: '#ffffff', fontSize: 13, fontWeight: 700, lineHeight: 1 }}>高级会员</span>
+              <span style={{ color: '#ff5555', fontSize: 13, fontWeight: 800, lineHeight: 1 }}>7折优惠</span>
+            </button>
+
+            {/* 未登录：粉色胶囊登录按钮 */}
+            <button
+              onClick={() => router.push('/auth')}
+              type="button"
+              style={{
+                height: 36,
+                padding: '0 22px',
+                borderRadius: 999,
+                border: '1.5px solid #D4537E',
+                background: 'transparent',
+                color: '#D4537E',
+                fontSize: 14,
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                lineHeight: 1,
+              }}
+            >
+              登录
+            </button>
+          </>
         )}
       </div>
     </div>
