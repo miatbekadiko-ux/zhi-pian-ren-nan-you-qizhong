@@ -173,7 +173,7 @@ export function Sidebar({ active, locked = false, onVipClick }: SidebarProps) {
               <circle cx="0.5" cy="7" r="1.5" fill="rgba(255,210,100,0.8)"/>
               <circle cx="13.5" cy="7" r="1.5" fill="rgba(255,210,100,0.8)"/>
             </svg>
-            <Icon name="gem" size={20} color="#E8C060" />
+            <Icon name="gem" size={22} color="#E8C060" />
           </button>
           <span style={{
             position: 'absolute',
@@ -194,9 +194,9 @@ export function Sidebar({ active, locked = false, onVipClick }: SidebarProps) {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <div style={{ width: 42, height: 42, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Icon name="gem" size={20} color="#C9A16E" />
+              <Icon name="gem" size={22} color="#C9A16E" />
             </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#C9A16E', whiteSpace: 'nowrap' }}>会员</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: '#C9A16E', whiteSpace: 'nowrap' }}>会员</span>
           </div>
           <span style={{ padding: '3px 7px', borderRadius: 999, background: '#E61B3E', color: '#fff', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>-70%</span>
         </div>
