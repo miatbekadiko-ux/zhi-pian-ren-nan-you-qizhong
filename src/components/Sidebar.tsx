@@ -122,7 +122,7 @@ export function Sidebar({ active, locked = false, onVipClick }: SidebarProps) {
             onMouseLeave={() => setHovered(null)}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', gap: 14,
-              padding: '1px 20px', borderRadius: 20,
+              padding: '1px 20px', borderRadius: 14,
               background: overlay ? 'rgba(255,255,255,0.10)' : 'transparent',
               border: overlay ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.06)',
               cursor: locked ? 'default' : 'pointer',
@@ -187,16 +187,18 @@ export function Sidebar({ active, locked = false, onVipClick }: SidebarProps) {
         </div>
       ) : (
         <div
-          style={{ marginTop: 10, padding: '20px 18px', borderRadius: 20, background: vipHovered ? 'rgba(255,255,255,0.10)' : 'transparent', border: `1.5px solid ${vipHovered ? 'rgba(201,161,110,0.7)' : 'rgba(201,161,110,0.35)'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer', transition: 'background 0.2s ease, border 0.2s ease', flexShrink: 0 }}
+          style={{ marginTop: 10, padding: '1px 20px', borderRadius: 14, background: vipHovered ? 'rgba(255,255,255,0.10)' : 'transparent', border: `1.5px solid ${vipHovered ? 'rgba(201,161,110,0.7)' : 'rgba(201,161,110,0.35)'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, cursor: 'pointer', transition: 'background 0.2s ease, border 0.2s ease', flexShrink: 0 }}
           onClick={() => onVipClick ? onVipClick() : router.push('/settings')}
           onMouseEnter={() => setVipHovered(true)}
           onMouseLeave={() => setVipHovered(false)}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Icon name="gem" size={20} color="#C9A16E" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 42, height: 42, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Icon name="gem" size={20} color="#C9A16E" />
+            </div>
             <span style={{ fontSize: 14, fontWeight: 700, color: '#C9A16E', whiteSpace: 'nowrap' }}>会员</span>
           </div>
-          <span style={{ padding: '6px 12px', borderRadius: 999, background: '#E61B3E', color: '#fff', fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap' }}>-70%</span>
+          <span style={{ padding: '3px 7px', borderRadius: 999, background: '#E61B3E', color: '#fff', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>-70%</span>
         </div>
       )}
     </div>
