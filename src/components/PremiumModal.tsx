@@ -116,7 +116,7 @@ export function PremiumModal({ open, onClose }: PremiumModalProps) {
       fontFamily: '"Noto Sans SC", system-ui, sans-serif',
       overflow: 'hidden',
     }}>
-      {/* 导航栏，overflow hidden 确保光晕不往上渗 */}
+      {/* 导航栏 */}
       <div style={{ flexShrink: 0, overflow: 'hidden' }}>
         <TopNav onPremiumClick={() => {}} />
       </div>
@@ -124,27 +124,23 @@ export function PremiumModal({ open, onClose }: PremiumModalProps) {
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
         <Sidebar active="" onVipClick={() => {}} />
 
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        {/* 内容区：用 relative 让光晕用绝对定位贴顶，不占布局空间 */}
+        <div style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
 
-          {/* 光晕：作为内容区第一个元素，紧贴导航栏下方，绝对不会渗入导航栏 */}
+          {/* 光晕：absolute，贴内容区顶部，pointer-events none，不占空间不影响布局 */}
           <div style={{
-            height: 0,
-            display: 'flex',
-            justifyContent: 'center',
-            overflow: 'visible',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 120,
+            background: 'radial-gradient(ellipse 36% 100% at 50% 0%, rgba(160,15,60,0.55) 0%, rgba(120,10,45,0.25) 50%, transparent 100%)',
             pointerEvents: 'none',
-          }}>
-            <div style={{
-              width: '50%',
-              height: 10,
-              background: 'rgba(255,90,138,1)',
-              borderRadius: '50%',
-              filter: 'blur(32px)',
-              marginTop: 0,
-            }} />
-          </div>
+            zIndex: 0,
+          }} />
 
-          <div style={{ padding: '36px 48px 40px' }}>
+          {/* 内容：z-index 1 叠在光晕上方，padding 与其他页面完全一致 */}
+          <div style={{ position: 'relative', zIndex: 1, padding: '36px 48px 40px' }}>
             <div style={{ maxWidth: 760, margin: '0 auto' }}>
 
               <h1 style={{ fontSize: '1.9rem', fontWeight: 800, color: '#fff', textAlign: 'center', marginBottom: 6, letterSpacing: '-0.02em' }}>

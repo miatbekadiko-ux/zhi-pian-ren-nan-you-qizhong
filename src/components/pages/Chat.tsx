@@ -24,11 +24,9 @@ const CHAT_CSS = `
 type ImgState = 'pending' | 'loading' | 'done';
 type Msg = { id: number; role: 'user' | 'ai'; text: string; imageUrl?: string | null; imgState?: ImgState };
 
-// ── 自动播放 TTS helper ──────────────────────────────────────────────
 async function autoPlayTTS(text: string, characterId: string) {
   if (typeof window === 'undefined') return;
   if (localStorage.getItem('zprn_tts') !== 'true') return;
-
   try {
     const res = await fetch('/api/tts', {
       method: 'POST',
@@ -45,8 +43,6 @@ async function autoPlayTTS(text: string, characterId: string) {
       return;
     }
   } catch { /* fall through to browser TTS */ }
-
-  // fallback: 浏览器原生 TTS
   if ('speechSynthesis' in window) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'zh-CN';
@@ -251,6 +247,28 @@ function LoginModal({ c, onClose, onLogin }: { c: Character; onClose: () => void
   );
 }
 
+
+function MenuBtn({ onClick, children, color }: { onClick: () => void; children: React.ReactNode; color?: string }) {
+  const [hovered, setHovered] = React.useState(false);
+  return (
+    <button
+      onClick={onClick}
+      type="button"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        width: '100%', padding: '13px 16px', border: 'none',
+        background: hovered ? 'rgba(255,255,255,0.06)' : 'transparent',
+        color: color || 'inherit', fontSize: 14, textAlign: 'left', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', gap: 12,
+        transition: 'background 0.15s ease',
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
 function formatMsgTime(iso: string): string {
   const d = new Date(iso);
   const now = new Date();
@@ -324,10 +342,8 @@ export function PageChat() {
   useEffect(() => {
     if (!isLoggedIn) { setMessages([]); return; }
     if (isTypingRef.current) return;
-
     let cancelled = false;
     const controller = new AbortController();
-
     fetch(`/api/chat?characterId=${activeId}`, { signal: controller.signal })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(data => {
@@ -339,14 +355,8 @@ export function PageChat() {
           imageUrl: m.imageUrl,
         })));
       })
-      .catch(err => {
-        if (err.name !== 'AbortError') console.error(err);
-      });
-
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
+      .catch(err => { if (err.name !== 'AbortError') console.error(err); });
+    return () => { cancelled = true; controller.abort(); };
   }, [activeId, isLoggedIn]);
 
   useEffect(() => {
@@ -355,9 +365,7 @@ export function PageChat() {
 
   const active = characters.find(c => c.id === activeId) ?? characters[1];
 
-  useEffect(() => {
-    activeIdRef.current = activeId;
-  }, [activeId]);
+  useEffect(() => { activeIdRef.current = activeId; }, [activeId]);
 
   const switchCharacter = (id: string) => {
     activeIdRef.current = id;
@@ -374,7 +382,6 @@ export function PageChat() {
     const text = input.trim();
     if (!text || isTyping || sendingRef.current) return;
     if (!isLoggedIn) { setShowLoginModal(true); return; }
-
     const currentCharacterId = activeId;
     sendingRef.current = true;
     const tempId = tempIdRef.current--;
@@ -383,11 +390,7 @@ export function PageChat() {
     setMessages(prev => [...prev, { id: tempId, role: 'user', text }]);
     isTypingRef.current = true;
     setIsTyping(true);
-    setConvoPreviews(prev => ({
-      ...prev,
-      [currentCharacterId]: { lastMessagePreview: text, updatedAt: new Date().toISOString() },
-    }));
-
+    setConvoPreviews(prev => ({ ...prev, [currentCharacterId]: { lastMessagePreview: text, updatedAt: new Date().toISOString() } }));
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -397,39 +400,22 @@ export function PageChat() {
       if (!res.ok) throw new Error('request failed');
       const data = await res.json();
       if (!data?.userMessage || !data?.aiMessage) throw new Error('invalid response');
-
       const aiMsgId = data.aiMessage.id;
       const generatingImage = !!data.generatingImage;
-
       if (activeIdRef.current !== currentCharacterId) return;
-
       isTypingRef.current = false;
       setIsTyping(false);
       setMessages(prev => {
         if (prev.some(m => m.id === aiMsgId)) return prev;
         const realUser: Msg = { id: data.userMessage.id, role: 'user', text: data.userMessage.content ?? text };
-        const aiMsg: Msg = {
-          id: aiMsgId,
-          role: 'ai',
-          text: data.aiMessage.content,
-          imageUrl: null,
-          imgState: generatingImage ? 'loading' : undefined,
-        };
+        const aiMsg: Msg = { id: aiMsgId, role: 'ai', text: data.aiMessage.content, imageUrl: null, imgState: generatingImage ? 'loading' : undefined };
         const hasTemp = prev.some(m => m.id === capturedTempId);
         const replaced = prev.map(m => m.id === capturedTempId ? realUser : m);
         return hasTemp ? [...replaced, aiMsg] : [...prev, realUser, aiMsg];
       });
-
-      // ── 自动播放 TTS（如果用户开启了设置开关）──
       autoPlayTTS(data.aiMessage.content, activeId);
-
-      setConvoPreviews(prev => ({
-        ...prev,
-        [currentCharacterId]: { lastMessagePreview: data.aiMessage.content, updatedAt: new Date().toISOString() },
-      }));
-
+      setConvoPreviews(prev => ({ ...prev, [currentCharacterId]: { lastMessagePreview: data.aiMessage.content, updatedAt: new Date().toISOString() } }));
       sendingRef.current = false;
-
       if (generatingImage) {
         (async () => {
           for (let i = 0; i < 30; i++) {
@@ -438,16 +424,12 @@ export function PageChat() {
               const r = await fetch(`/api/chat/image?messageId=${aiMsgId}`);
               const d = await r.json();
               if (d.imageUrl) {
-                setMessages(prev => prev.map(m =>
-                  m.id === aiMsgId ? { ...m, imageUrl: d.imageUrl, imgState: 'done' as const } : m
-                ));
+                setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, imageUrl: d.imageUrl, imgState: 'done' as const } : m));
                 return;
               }
             } catch { /* continue polling */ }
           }
-          setMessages(prev => prev.map(m =>
-            m.id === aiMsgId ? { ...m, imageUrl: 'placeholder', imgState: 'done' as const } : m
-          ));
+          setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, imageUrl: 'placeholder', imgState: 'done' as const } : m));
         })();
       }
     } catch {
@@ -459,10 +441,7 @@ export function PageChat() {
   }, [input, isTyping, isLoggedIn, activeId]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
   useEffect(() => {
@@ -474,33 +453,20 @@ export function PageChat() {
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
 
-  const resetChat = useCallback(() => {
-    setMenuOpen(false);
-    setMessages([]);
-  }, []);
+  const resetChat = useCallback(() => { setMenuOpen(false); setMessages([]); }, []);
 
   const deleteChat = useCallback(async () => {
     setMenuOpen(false);
     await fetch(`/api/conversations?characterId=${activeId}`, { method: 'DELETE' });
     setMessages([]);
-    setConvoPreviews(prev => {
-      const next = { ...prev };
-      delete next[activeId];
-      return next;
-    });
+    setConvoPreviews(prev => { const next = { ...prev }; delete next[activeId]; return next; });
   }, [activeId]);
 
   const conversations = characters
     .filter(c => !!convoPreviews[c.id])
     .map(c => {
       const preview = convoPreviews[c.id]!;
-      return {
-        c,
-        last: preview.lastMessagePreview ?? '',
-        time: formatMsgTime(preview.updatedAt),
-        updatedAt: preview.updatedAt,
-        active: c.id === activeId,
-      };
+      return { c, last: preview.lastMessagePreview ?? '', time: formatMsgTime(preview.updatedAt), updatedAt: preview.updatedAt, active: c.id === activeId };
     })
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
@@ -516,14 +482,12 @@ export function PageChat() {
 
           <Sidebar active="chat" onVipClick={() => setPremiumOpen(true)} />
 
+          {/* 左侧聊天列表 */}
           <div style={{ width: 300, background: T.panel, borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-            <div style={{ height: 58, padding: '0 18px', borderBottom: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', justifyContent: 'center', flexShrink: 0 }}>
-              <div style={{ fontSize: 20, fontWeight: 700 }}>聊天</div>
-              <div style={{ fontSize: 11, color: T.textMute, marginTop: 1, letterSpacing: 0.5 }}>
-                {conversations.length > 0 ? `${conversations.length} 条对话记录` : '去首页选一位男友开始聊天吧'}
-              </div>
+            <div style={{ height: 72, padding: '0 24px', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              <div style={{ fontSize: 24, fontWeight: 700 }}>聊天</div>
             </div>
-            <div style={{ padding: '10px 12px', flexShrink: 0 }}>
+            <div style={{ padding: '0 12px 10px', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: T.panel3, border: `1px solid ${T.border}`, borderRadius: 8, fontSize: 12, color: T.textMute }}>
                 <span>🔍</span>搜索消息
               </div>
@@ -536,28 +500,65 @@ export function PageChat() {
           </div>
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
-            <div style={{ height: 58, padding: '0 16px 0 22px', display: 'flex', alignItems: 'center', borderBottom: `1px solid ${T.border}`, background: T.panel, flexShrink: 0, gap: 12 }}>
-              <Avatar c={active} size={38} />
+            {/* 聊天头部 */}
+            <div style={{ height: 72, padding: '0 16px 0 24px', display: 'flex', alignItems: 'center', borderBottom: `1px solid ${T.border}`, background: T.panel, flexShrink: 0, gap: 14 }}>
+              <Avatar c={active} size={46} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 22, fontWeight: 600, color: T.text }}>{active.name}</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: T.text }}>{active.name}</div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                {/* 三点菜单按钮 */}
                 <div ref={menuRef} style={{ position: 'relative' }}>
-                  <button onClick={() => setMenuOpen(v => !v)} type="button" style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.10)', border: `1px solid rgba(255,255,255,0.25)`, color: 'rgba(255,255,255,0.9)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="4" height="18" viewBox="0 0 4 18" fill="currentColor"><circle cx="2" cy="2" r="2"/><circle cx="2" cy="9" r="2"/><circle cx="2" cy="16" r="2"/></svg>
+                  <button
+                    onClick={() => setMenuOpen(v => !v)}
+                    type="button"
+                    style={{ width: 52, height: 52, borderRadius: 12, background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.85)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <circle cx="12" cy="3.5" r="2.5"/>
+                      <circle cx="12" cy="12" r="2.5"/>
+                      <circle cx="12" cy="20.5" r="2.5"/>
+                    </svg>
                   </button>
                   {menuOpen && (
-                    <div style={{ position: 'absolute', top: 42, right: 0, width: 148, background: T.panel2, border: `1px solid ${T.border}`, borderRadius: 10, overflow: 'hidden', zIndex: 50, boxShadow: '0 8px 28px rgba(0,0,0,0.45)' }}>
-                      <button onClick={resetChat} type="button" style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', color: T.text, fontSize: 13, textAlign: 'left', cursor: 'pointer', display: 'block' }}>重置聊天</button>
-                      <div style={{ height: 1, background: T.border }} />
-                      <button onClick={deleteChat} type="button" style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', color: '#f87171', fontSize: 13, textAlign: 'left', cursor: 'pointer', display: 'block' }}>删除聊天</button>
+                    <div style={{
+                      position: 'absolute', top: 56, right: 0, width: 180,
+                      background: '#1e1e24',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 14, overflow: 'hidden', zIndex: 50,
+                      boxShadow: '0 20px 60px rgba(0,0,0,0.7), 0 4px 16px rgba(0,0,0,0.5)',
+                    }}>
+                      <MenuBtn onClick={resetChat} color={T.text}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.27"/>
+                          </svg>
+                        </div>
+                        重置聊天
+                      </MenuBtn>
+                      <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 12px' }} />
+                      <MenuBtn onClick={deleteChat} color="#f87171">
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(248,113,113,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                          </svg>
+                        </div>
+                        删除聊天
+                      </MenuBtn>
                     </div>
                   )}
                 </div>
-                <button onClick={() => setPanelOpen(v => !v)} type="button" style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.10)', border: `1px solid rgba(255,255,255,0.25)`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ transform: panelOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.25s ease', display: 'flex', alignItems: 'center' }}>
-                    <Icon name="arrow" size={14} color={T.textMute} />
-                  </div>
+                {/* 折叠面板按钮 */}
+                <button
+                  onClick={() => setPanelOpen(v => !v)}
+                  type="button"
+                  style={{ width: 52, height: 52, borderRadius: 12, background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.85)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <svg width="24" height="18" viewBox="0 0 24 18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                    <line x1="0" y1="2" x2="24" y2="2"/>
+                    <line x1="4" y1="9" x2="24" y2="9"/>
+                    <line x1="9" y1="16" x2="24" y2="16"/>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -632,7 +633,6 @@ export function PageChat() {
 
         </div>
       </div>
-
       {showLoginModal && (
         <LoginModal c={active} onClose={() => setShowLoginModal(false)} onLogin={() => router.push('/auth')} />
       )}
