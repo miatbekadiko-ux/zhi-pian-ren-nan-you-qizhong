@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { T } from '@/lib/tokens';
 import { Icon } from './Icon';
+import { ContactModal } from './ContactModal';
 
 const SIDEBAR_KEY = 'zprn_sidebar_collapsed';
 
@@ -29,6 +30,8 @@ export function Sidebar({ active, locked = false, onVipClick }: SidebarProps) {
   });
   const [hovered, setHovered] = React.useState<string | null>(null);
   const [vipHovered, setVipHovered] = React.useState(false);
+  const [contactHovered, setContactHovered] = React.useState(false);
+  const [contactOpen, setContactOpen] = React.useState(false);
 
   React.useEffect(() => {
     const handler = () => {
@@ -157,9 +160,7 @@ export function Sidebar({ active, locked = false, onVipClick }: SidebarProps) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'background 0.2s ease',
               boxShadow: vipHovered ? '0 4px 14px rgba(180,130,50,0.3)' : 'none',
-              position: 'relative',
-              overflow: 'hidden',
-              flexShrink: 0,
+              position: 'relative', overflow: 'hidden', flexShrink: 0,
             }}
           >
             <svg width="8" height="8" viewBox="0 0 14 14" fill="none"
@@ -181,8 +182,7 @@ export function Sidebar({ active, locked = false, onVipClick }: SidebarProps) {
             background: 'rgba(40,40,40,0.95)', color: '#ffffff',
             fontSize: 13, padding: '4px 10px', borderRadius: 6, whiteSpace: 'nowrap',
             opacity: vipHovered ? 1 : 0, pointerEvents: 'none',
-            transition: 'opacity 0.15s ease',
-            zIndex: 100,
+            transition: 'opacity 0.15s ease', zIndex: 100,
           }}>会员</span>
         </div>
       ) : (
@@ -201,6 +201,76 @@ export function Sidebar({ active, locked = false, onVipClick }: SidebarProps) {
           <span style={{ padding: '3px 7px', borderRadius: 999, background: '#E61B3E', color: '#fff', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>-70%</span>
         </div>
       )}
+
+      {/* 弹性空间，把联系我们推到底部 */}
+      <div style={{ flex: 1 }} />
+
+      {/* 联系我们按钮 */}
+      {collapsed ? (
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          <button
+            type="button"
+            onClick={() => setContactOpen(true)}
+            onMouseEnter={() => setContactHovered(true)}
+            onMouseLeave={() => setContactHovered(false)}
+            style={{
+              width: 52, height: 52, borderRadius: 16,
+              background: contactHovered ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.05)',
+              border: contactHovered ? '1px solid rgba(255,255,255,0.25)' : '1px solid rgba(255,255,255,0.06)',
+              color: '#ffffff', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 0.2s ease, border-color 0.2s ease',
+              boxShadow: contactHovered ? '0 2px 12px rgba(255,255,255,0.08)' : 'none',
+              flexShrink: 0,
+            }}
+          >
+            <Icon name="mail" size={22} />
+          </button>
+          <span style={{
+            position: 'absolute',
+            left: 'calc(100% + 8px)', top: '50%', transform: 'translateY(-50%)',
+            background: 'rgba(40,40,40,0.95)', color: '#ffffff',
+            fontSize: 13, padding: '6px 10px', borderRadius: 6, whiteSpace: 'nowrap',
+            opacity: contactHovered ? 1 : 0, pointerEvents: 'none',
+            transition: 'opacity 0.15s ease', zIndex: 9999,
+          }}>联系我们</span>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setContactOpen(true)}
+          onMouseEnter={() => setContactHovered(true)}
+          onMouseLeave={() => setContactHovered(false)}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: 14,
+            padding: '1px 20px', borderRadius: 14,
+            background: contactHovered ? 'rgba(255,255,255,0.10)' : 'transparent',
+            border: contactHovered ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(255,255,255,0.06)',
+            cursor: 'pointer', textAlign: 'left',
+            fontSize: 16, fontWeight: 500,
+            transition: 'background 0.2s ease',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{
+            width: 42, height: 42, borderRadius: 14,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: contactHovered ? '#ffffff' : 'rgba(255,255,255,0.75)',
+            flexShrink: 0,
+          }}>
+            <Icon name="mail" size={22} />
+          </div>
+          <span style={{ color: contactHovered ? '#ffffff' : 'rgba(255,255,255,0.75)', whiteSpace: 'nowrap' }}>
+            联系我们
+          </span>
+        </button>
+      )}
+
+      {/* 弹窗 */}
+      <ContactModal
+        open={contactOpen}
+        onClose={() => setContactOpen(false)}
+      />
     </div>
   );
 }
