@@ -132,15 +132,19 @@ function BubbleAI({ c, text, imageUrl, imgState }: { c: Character; text: string;
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playingRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null); // ← 新增：用于取消进行中的 fetch
 
   useEffect(() => {
     return () => {
+      abortRef.current?.abort();
       if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     };
   }, []);
 
   const stopPlayback = () => {
+    abortRef.current?.abort(); // ← 取消进行中的 fetch
+    abortRef.current = null;
     playingRef.current = false;
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -149,13 +153,22 @@ function BubbleAI({ c, text, imageUrl, imgState }: { c: Character; text: string;
 
   const togglePlay = async () => {
     if (playingRef.current) { stopPlayback(); return; }
+
+    // ← 先把上一次未完成的请求和音频全部停掉，再开始新的
+    abortRef.current?.abort();
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+
+    const controller = new AbortController(); // ← 新建 controller
+    abortRef.current = controller;
     playingRef.current = true;
     setPlaying(true);
+
     try {
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, characterId: c.id }),
+        signal: controller.signal, // ← 绑定 signal，点击第二次时会 abort 这个请求
       });
       if (res.ok) {
         const blob = await res.blob();
@@ -167,7 +180,16 @@ function BubbleAI({ c, text, imageUrl, imgState }: { c: Character; text: string;
         audio.play();
         return;
       }
-    } catch { /* fall through */ }
+    } catch (err: unknown) {
+      // fetch 被 abort 时抛出 AbortError，属于正常流程，直接 return
+      if (err instanceof Error && err.name === 'AbortError') {
+        setPlaying(false);
+        playingRef.current = false;
+        return;
+      }
+      /* fall through to browser TTS */
+    }
+
     if (!('speechSynthesis' in window)) { playingRef.current = false; setPlaying(false); return; }
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'zh-CN';
