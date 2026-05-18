@@ -7,6 +7,67 @@ interface ContactModalProps {
   onClose: () => void;
 }
 
+function EnvelopeIcon() {
+  // 信封尺寸 100x72，中心点 (50, 36)
+  // 4个三角形颜色：
+  // 上(翻盖): 浅粉白 #fdeef4
+  // 下: 深粉 #d44e78
+  // 左: 中粉 #e8608a
+  // 右: 中粉 #e8608a
+  const W = 100;
+  const H = 72;
+  const cx = W / 2; // 50
+  const cy = H / 2; // 36
+
+  return (
+    <div style={{ position: 'relative', display: 'inline-block', marginBottom: 28, marginTop: 18 }}>
+      <svg
+        width={W}
+        height={H}
+        viewBox={`0 0 ${W} ${H}`}
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <clipPath id="env-rect">
+            <rect x="0" y="0" width={W} height={H} rx="8"/>
+          </clipPath>
+        </defs>
+        <g clipPath="url(#env-rect)">
+          {/* 底色 */}
+          <rect x="0" y="0" width={W} height={H} fill="#ef5f8e"/>
+          {/* 上三角 — 翻盖，浅粉白 */}
+          <polygon points={`0,0 ${W},0 ${cx},${cy}`} fill="#fdeef4"/>
+          {/* 下三角 — 深粉 */}
+          <polygon points={`0,${H} ${W},${H} ${cx},${cy}`} fill="#c94870"/>
+          {/* 左三角 — 中粉偏暗 */}
+          <polygon points={`0,0 0,${H} ${cx},${cy}`} fill="#d85580"/>
+          {/* 右三角 — 中粉偏暗 */}
+          <polygon points={`${W},0 ${W},${H} ${cx},${cy}`} fill="#d85580"/>
+        </g>
+      </svg>
+
+      {/* 圆形勾 — 压在上翻盖中心 */}
+      <div style={{
+        position: 'absolute',
+        top: -16,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 36, height: 36,
+        borderRadius: '50%',
+        background: '#ef5f8e',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 2,
+        boxShadow: '0 2px 10px rgba(239,95,142,0.6)',
+      }}>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3.5 9l4 4 7-8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 export function ContactModal({ open, onClose }: ContactModalProps) {
   const [message, setMessage] = React.useState('');
   const [sending, setSending] = React.useState(false);
@@ -48,7 +109,7 @@ export function ContactModal({ open, onClose }: ContactModalProps) {
       onClick={handleClose}
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(0,0,0,0.72)',
+        background: 'rgba(0,0,0,0.75)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}
     >
@@ -57,11 +118,13 @@ export function ContactModal({ open, onClose }: ContactModalProps) {
         style={{
           width: 400,
           borderRadius: 20,
-          background: '#1c1c1c',
-          padding: sent ? '24px 28px 28px' : '36px 32px 32px',
+          background: '#1a1a1a',
+          padding: sent ? '48px 32px 44px' : '36px 32px 32px',
           position: 'relative',
-          border: '1px solid rgba(255,255,255,0.10)',
-          boxShadow: '0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.7)',
+          boxSizing: 'border-box',
+          textAlign: sent ? 'center' : 'left',
         }}
       >
         <button
@@ -69,89 +132,27 @@ export function ContactModal({ open, onClose }: ContactModalProps) {
           style={{
             position: 'absolute', top: 18, right: 20,
             background: 'none', border: 'none',
-            color: 'rgba(255,255,255,0.5)', fontSize: 24,
+            color: 'rgba(255,255,255,0.4)', fontSize: 22,
             cursor: 'pointer', lineHeight: 1, padding: 0,
           }}
         >×</button>
 
         {sent ? (
-          <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
-            {/* 
-              信封设计思路：
-              - SVG viewBox: 0 0 120 90
-              - 圆角矩形主体: x=0 y=0 w=120 h=90 rx=10
-              - 用 clipPath 裁切，所有图形不会超出圆角边界
-              - 翻盖三角顶点: (0,0) (120,0) (60,42)
-              - 左下三角: (0,0) (60,42) (0,90)
-              - 右下三角: (120,0) (60,42) (120,90)
-              - 底部三角: (0,90) (60,42) (120,90)
-              圆形勾: 圆心在 y=0（矩形顶边），一半在外一半在内
-            -->
-            */}
-            <div style={{
-              display: 'inline-block',
-              position: 'relative',
-              marginBottom: 20,
-              marginTop: 32,
+          <>
+            <EnvelopeIcon />
+            <h2 style={{
+              color: '#ffffff', fontSize: 24, fontWeight: 800,
+              margin: '0 0 16px', letterSpacing: '-0.3px',
             }}>
-              <svg
-                width="150"
-                height="112"
-                viewBox="0 0 120 90"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  {/* 圆角矩形裁切区域 */}
-                  <clipPath id="envelope-clip">
-                    <rect x="0" y="0" width="120" height="90" rx="10" ry="10"/>
-                  </clipPath>
-                </defs>
-
-                {/* 所有图形都在 clipPath 内，完全不会溢出 */}
-                <g clipPath="url(#envelope-clip)">
-                  {/* 信封主体底色 */}
-                  <rect x="0" y="0" width="120" height="90" fill="#e879a0"/>
-                  {/* 左侧阴影三角 */}
-                  <polygon points="0,0 60,42 0,90" fill="#c8628580"/>
-                  {/* 右侧阴影三角 */}
-                  <polygon points="120,0 60,42 120,90" fill="#c8628580"/>
-                  {/* 翻盖三角 — 浅粉色 */}
-                  <polygon points="0,0 120,0 60,42" fill="#fce8f0"/>
-                </g>
-              </svg>
-
-              {/* 圆形勾：top=-24 让圆心在信封顶边(y=0)处，一半在外一半压住翻盖 */}
-              <div style={{
-                position: 'absolute',
-                top: -24,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: 48, height: 48,
-                borderRadius: '50%',
-                background: '#e879a0',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                zIndex: 2,
-              }}>
-                <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-                  <path
-                    d="M5 13l6 6L21 7"
-                    stroke="white"
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            <h2 style={{ color: '#ffffff', fontSize: 20, fontWeight: 700, margin: '0 0 10px' }}>
-              感谢你的反馈！
+              感谢您的反馈
             </h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, lineHeight: 1.7, margin: 0 }}>
-              我们会在 24 小时内回复到您的邮箱，请注意查收！
+            <p style={{
+              color: 'rgba(255,255,255,0.6)', fontSize: 14,
+              lineHeight: 1.8, margin: 0,
+            }}>
+              我们会在 24 小时内回复到您的邮箱，请注意查收
             </p>
-          </div>
+          </>
         ) : (
           <>
             <h2 style={{ color: '#ffffff', fontSize: 22, fontWeight: 700, margin: '0 0 10px' }}>
