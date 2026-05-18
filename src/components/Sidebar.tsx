@@ -24,14 +24,15 @@ interface SidebarProps {
 
 export function Sidebar({ active, locked = false, onVipClick }: SidebarProps) {
   const router = useRouter();
-  const [collapsed, setCollapsed] = React.useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem(SIDEBAR_KEY) === 'true';
-  });
+  const [collapsed, setCollapsed] = React.useState(false);
   const [hovered, setHovered] = React.useState<string | null>(null);
   const [vipHovered, setVipHovered] = React.useState(false);
   const [contactHovered, setContactHovered] = React.useState(false);
   const [contactOpen, setContactOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    setCollapsed(localStorage.getItem(SIDEBAR_KEY) === 'true');
+  }, []);
 
   React.useEffect(() => {
     const handler = () => {
