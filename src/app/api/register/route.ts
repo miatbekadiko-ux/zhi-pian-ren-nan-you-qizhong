@@ -3,6 +3,7 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
+import { sendWelcomeEmail } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
   try {
@@ -37,6 +38,14 @@ export async function POST(req: NextRequest) {
 
     const passwordHash = await bcrypt.hash(password, 10);
     const [user] = await db.insert(users).values({ email, passwordHash, birthday: birthday ?? null }).returning({ id: users.id, email: users.email });
+
+    // ── 注册成功后发送欢迎邮件（失败不影响注册）──────────────────
+    try {
+      await sendWelcomeEmail(user.email, user.email);
+    } catch (error) {
+      console.error('欢迎邮件发送失败：', error);
+    }
+    // ────────────────────────────────────────────────────────────
 
     return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
   } catch {
