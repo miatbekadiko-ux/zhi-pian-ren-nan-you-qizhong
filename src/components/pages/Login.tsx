@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
+import { Turnstile } from '@marsidev/react-turnstile'; // ← 新增
 import { T } from '@/lib/tokens';
 import { Sidebar } from '@/components/Sidebar';
 import { Halos } from '@/components/Halos';
@@ -77,6 +78,7 @@ export function PageLogin() {
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirm?: string; general?: string }>({});
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string>(''); // ← 新增
 
   useEffect(() => {
     if (status === 'authenticated') router.replace('/');
@@ -110,11 +112,22 @@ export function PageLogin() {
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
+    // ← 新增：Turnstile 未通过时阻止提交
+    if (!turnstileToken) {
+      setErrors({ general: '请先完成人机验证' });
+      return;
+    }
+
     setLoading(true);
     const res = await fetch('/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, birthday: birthday || undefined }),
+      body: JSON.stringify({
+        email,
+        password,
+        birthday: birthday || undefined,
+        turnstileToken, // ← 新增：把 token 一起发给后端验证
+      }),
     });
     if (!res.ok) {
       const data = await res.json();
@@ -140,6 +153,7 @@ export function PageLogin() {
   const switchTab = (t: 'login' | 'register') => {
     setTab(t);
     setErrors({});
+    setTurnstileToken(''); // ← 切换 tab 时重置 token
   };
 
   return (
@@ -203,6 +217,17 @@ export function PageLogin() {
                       style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: birthday ? T.text : T.textMute, fontSize: 14, fontFamily: 'inherit', colorScheme: 'dark' }}
                     />
                   </div>
+                </div>
+
+                {/* ← 新增：Turnstile 人机验证组件，放在注册按钮上方 */}
+                <div style={{ marginTop: 16 }}>
+                  <Turnstile
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                    onSuccess={(token) => setTurnstileToken(token)}
+                    onExpire={() => setTurnstileToken('')}
+                    onError={() => setTurnstileToken('')}
+                    options={{ theme: 'dark', language: 'zh-CN' }}
+                  />
                 </div>
               </>
             )}
